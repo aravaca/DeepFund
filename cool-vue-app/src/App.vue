@@ -71,16 +71,18 @@
           class="fade-in"
         >
           <span class="rank">{{ tickers.length - index }}.</span>
+
           <span class="ticker-wrapper">
             <a
               class="ticker"
               :href="`https://www.google.com/search?q=${encodeURIComponent(item.ticker)}`"
               target="_blank"
               rel="noopener noreferrer"
+              @mousemove="(e) => handleMagnifierMove(e, $event.target)"
+              @mouseleave="hideMagnifier"
             >
               {{ item.ticker }}
             </a>
-            <div class="magnifier" ref="magnifier"></div>
           </span>
 
           <span
@@ -91,6 +93,28 @@
           </span>
         </li>
       </ul>
+
+      <!-- 전체에서 하나만 사용하는 돋보기 DOM -->
+      <div
+        class="magnifier"
+        :style="magnifierStyle"
+        ref="magnifier"
+      >
+        <span
+          style="
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #114477;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translate(-30px, -30px);
+          "
+        >
+          {{ activeTickerText }}
+        </span>
+      </div>
+
 
       <!-- 구독 폼 -->
       <form class="subscribe-form" @submit.prevent="submitEmail">
@@ -127,6 +151,9 @@ const typedText = ref('')
 const marketRibbon = ref('로딩 중...')
 const showPrinciple = ref(false)
 const showInfoIcon = ref(false)
+const magnifier = ref(null)
+const activeTickerText = ref('')
+const magnifierStyle = ref({ left: '0px', top: '0px', display: 'none' })
 
 const fullText =
   `<span style="font-weight:700; color:#114477;">워렌 버핏</span>의 투자 원칙을 반영한 퀀트 알고리즘이 선정한 
@@ -268,6 +295,25 @@ onMounted(() => {
     });
   });
 });
+
+function handleMagnifierMove(e, textEl) {
+  const rect = textEl.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+
+  magnifierStyle.value = {
+    left: `${x - 30}px`,
+    top: `${y - 30}px`,
+    display: 'block',
+  }
+
+  activeTickerText.value = textEl.textContent
+}
+
+function hideMagnifier() {
+  magnifierStyle.value.display = 'none'
+}
+
 
 
 </script>
@@ -524,17 +570,25 @@ h1 {
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
-  display: inline-block; /* transform 적용을 위해 필요 */
+  display: block; /* ✅ block 또는 flex 가능 */
+  word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
+  white-space: normal;     /* ✅ 줄바꿈 허용 */
   transition: 
     color 0.15s, 
     background 0.15s, 
-    transform 0.2s ease-in-out;  /* 글자 확대용 */
+    transform 0.2s ease-in-out;
 }
+
 
 .ticker-wrapper {
   position: relative;
   display: inline-block;
+  max-width: 100%; /* 전체 너비 허용 */
+  word-break: break-word; /* 길면 단어 단위로 줄바꿈 */
+  white-space: normal; /* 줄바꿈 허용 */
+  text-align: center;
 }
+
 
 .magnifier {
   position: absolute;
@@ -643,6 +697,13 @@ h1 {
     transform: translateY(0);
   }
 }
+
+@media (max-width: 480px) {
+  .ticker {
+    text-align: left;
+  }
+}
+
 
 html {
   scroll-behavior: smooth;
