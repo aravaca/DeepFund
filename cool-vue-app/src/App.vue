@@ -297,18 +297,16 @@ onMounted(() => {
 });
 
 function handleMagnifierMove(e, textEl) {
-  const rect = textEl.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-
+  const rect = textEl.getBoundingClientRect();
+  // 돋보기 위치는 전체 페이지 기준 (viewport 기준)
   magnifierStyle.value = {
-    left: `${x - 30}px`,
-    top: `${y - 30}px`,
+    left: `${e.clientX - 30}px`,  // 커서 위치 기준으로 계산
+    top: `${e.clientY - 30}px`,
     display: 'block',
-  }
-
-  activeTickerText.value = textEl.textContent
+  };
+  activeTickerText.value = textEl.textContent;
 }
+
 
 function hideMagnifier() {
   magnifierStyle.value.display = 'none'
@@ -563,7 +561,7 @@ h1 {
   font-family: 'Noto Sans KR', sans-serif;
 }
 
-.ticker {
+a.ticker {
   flex: 1;
   text-align: center;
   color: #114477;
@@ -571,8 +569,10 @@ h1 {
   font-weight: 500;
   text-decoration: none;
   display: block; /* ✅ block 또는 flex 가능 */
+  max-width: 100px; /* ✅ 너비 제한 */
   word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
   white-space: normal;     /* ✅ 줄바꿈 허용 */
+  line-height: 1.3; /* ✅ 줄바꿈 시 높이 조절 */
   transition: 
     color 0.15s, 
     background 0.15s, 
@@ -704,7 +704,6 @@ h1 {
   }
 }
 
-
 html {
   scroll-behavior: smooth;
 }
@@ -736,7 +735,7 @@ html {
   user-select: none;
   transition: background 0.2s;
 }
-.ticker:hover {
+a.ticker:hover {
   color: #0056b3;
   text-decoration: underline;
   background: rgba(0,0,0,0.02);
