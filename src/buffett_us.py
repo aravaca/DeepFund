@@ -28,7 +28,7 @@ from scipy.stats import norm
 from scipy.stats import skew, kurtosis
 from scipy.stats.mstats import gmean
 from scipy.stats import linregress
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from google import genai
 from google.genai import types
 import json
@@ -571,6 +571,29 @@ def get_percentage_change(ticker):
 
     # Get last 1 month of price data
     data = ticker_obj.history(period="1mo")
+
+    if len(data) >= 2:
+        start_close = data['Close'].iloc[0]
+        end_close = data['Close'].iloc[-1]
+
+        if start_close != 0:
+            percent_change = ((end_close - start_close) / start_close) * 100
+            sign = "+" if percent_change >= 0 else ""
+            return f" ({sign}{percent_change:.2f}%)"
+        else:
+            return " ()"
+    else:
+        return " ()"
+
+def get_percentage_change_ttm(ticker):
+    ticker_obj = yf.Ticker(ticker)
+
+    # Get start of the current month
+    today = date.today()
+    start_of_month = today.replace(day=1)
+
+    # Fetch price data from start of month to today
+    data = ticker_obj.history(start=start_of_month, end=today)
 
     if len(data) >= 2:
         start_close = data['Close'].iloc[0]
@@ -1178,7 +1201,7 @@ def process_ticker_quantitatives():
             name = info.get("shortName", ticker)
             industry = info.get("industry", None)
             currentPrice = info.get("currentPrice", None)
-            percentage_change = get_percentage_change(ticker)
+            percentage_change = get_percentage_change_ttm(ticker)
 
             # Valuation & Liquidity
             debtToEquity = info.get('debtToEquity', None)
@@ -2173,7 +2196,7 @@ html_content = f"""
     <p>귀하의 중장기 투자 참고를 위해 <b>{date_kr}</b> 기준, 
     시가총액 상위 <b>{limit}</b>개, 뉴욕증권거래소(NYSE), 나스닥(NASDAQ), 아멕스(AMEX)에 상장된 기업들의 최신 퀀트 데이터를 전달드립니다.</p>
 
-    <p>각 기업의 총점수는 밸류에이션 점수, 실적모멘텀 점수, 그리고 가격/수급 점수를 반영하였습니다. 자세한 내용은 아래 해설을 참고해주시기 바랍니다.</p>
+    <p>각 기업의 총점수는 밸류에이션 점수, 실적모멘텀 점수, 가격/수급 점수, 그리고 경쟁 우위의 지속 가능성을 반영하였습니다. 자세한 내용은 아래 해설을 참고해주시기 바랍니다.</p>
 
     <h3 style="margin-top: 30px;"><strong>{date_kr} AI 선정 주요 뉴스 및 거시경제 분석</strong></h3>
 

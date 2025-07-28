@@ -25,9 +25,9 @@
           >i</span>
         </transition>
         <div v-if="showPrinciple" class="principle-popup" @click.stop>
-          <strong>DeepFund는 투자 판단의 근거를 밸류에이션, 실적 모멘텀, 그리고 가격/수급이라는 세 가지 범주로 나누어 체계적으로 평가합니다.</strong><br><br>
+          <strong>DeepFund는 투자 판단의 근거를 밸류에이션, 실적모멘텀, 가격/수급, 그리고 경쟁우위의 지속가능성이라는 네 가지 범주로 나누어 체계적으로 평가합니다.</strong><br><br>
           <b>🏦 밸류에이션이란?</b><br>
-          <span class="principle-bullet">기업의 내재가치는 장기적인 투자 성과의 핵심입니다. 밸류에이션 분석은 현재 주가가 그 기업의 실제 가치에 비해 과대평가되어 있는지, 혹은 저평가되어 있는지를 평가하는 과정입니다.</span><br>
+          <span class="principle-bullet">밸류에이션 분석은 현재 주가가 그 기업의 실제 가치에 비해 과대평가되어 있는지, 혹은 저평가되어 있는지를 평가하는 과정입니다.</span><br>
           <b>밸류에이션 팩터 (7개):</b><br>
           <span class="principle-bullet">• DCF(할인현금흐름)</span>
           <span class="principle-bullet">• PER(주가수익비율)</span>
@@ -36,7 +36,7 @@
           <span class="principle-bullet">• 업종 PER 비교</span>
           <span class="principle-bullet">• 부채비율(D/E), 유동비율(CR)</span><br>
           <b>📈 실적모멘텀이란?</b><br>
-          <span class="principle-bullet">가치투자의 핵심은 "훌륭한 기업을 적정한 가격에 사는 것"입니다. 실적 모멘텀은 기업이 지속적인 수익 창출 역량과 재무 건전성을 보유하고 있는지를 평가합니다.</span><br>
+          <span class="principle-bullet">실적모멘텀은 기업이 지속적인 수익 창출 역량과 재무 건전성을 보유하고 있는지를 평가합니다.</span><br>
           <b>실적모멘텀 팩터 (6개):</b><br>
           <span class="principle-bullet">• ROE/ROA Z-Score</span>
           <span class="principle-bullet">• 이자보상비율(ICR)</span>
@@ -71,15 +71,18 @@
           class="fade-in"
         >
           <span class="rank">{{ tickers.length - index }}.</span>
-          <a
-      class="ticker"
-      :href="`https://www.google.com/search?q=${encodeURIComponent(item.ticker)}`"
-      target="_blank"
-      rel="noopener noreferrer"
-      style="text-decoration: underline; color: #114477; cursor: pointer;"
-    >
-      {{ item.ticker }}
-    </a>
+          <span class="ticker-wrapper">
+            <a
+              class="ticker"
+              :href="`https://www.google.com/search?q=${encodeURIComponent(item.ticker)}`"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ item.ticker }}
+            </a>
+            <div class="magnifier" ref="magnifier"></div>
+          </span>
+
           <span
             class="change"
             :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }"
@@ -110,9 +113,12 @@
   </div>
 </template>
 
+
+
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import logo from './logo.png'
+import { nextTick } from 'vue'
 
 const tickers = ref([])
 const email = ref('')
@@ -228,6 +234,40 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
+
+onMounted(() => {
+  nextTick(() => {
+    const tickerLinks = document.querySelectorAll('.ticker');
+    
+    tickerLinks.forEach((link) => {
+      const magnifier = link.parentElement.querySelector('.magnifier');
+      if (!magnifier) return;
+
+      link.addEventListener('mousemove', (e) => {
+        const rect = link.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        magnifier.style.display = 'block';
+        magnifier.style.left = `${x - 30}px`;
+        magnifier.style.top = `${y - 30}px`;
+
+        magnifier.innerHTML = `<span style="
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #114477;
+          transform: translate(${-x}px, ${-y}px);
+          position: absolute;
+          left: 0; top: 0;
+        ">${link.textContent}</span>`;
+      });
+
+      link.addEventListener('mouseleave', () => {
+        magnifier.style.display = 'none';
+      });
+    });
+  });
+});
 
 
 </script>
@@ -484,7 +524,32 @@ h1 {
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
+  display: inline-block; /* transform 적용을 위해 필요 */
+  transition: 
+    color 0.15s, 
+    background 0.15s, 
+    transform 0.2s ease-in-out;  /* 글자 확대용 */
 }
+
+.ticker-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.magnifier {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: scale(1.6);
+  transform-origin: top left;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
 
 .change {
   flex: 1;
@@ -615,7 +680,7 @@ html {
   text-decoration: underline;
   background: rgba(0,0,0,0.02);
   border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
+  transform: scale(1.08);  /* 살짝 확대 */
 }
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.4,0,.2,1);
