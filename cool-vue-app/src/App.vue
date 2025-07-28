@@ -569,7 +569,7 @@ a.ticker {
   font-weight: 500;
   text-decoration: none;
   display: block; /* ✅ block 또는 flex 가능 */
-  max-width: 220px; /* ✅ 너비 제한 */
+  max-width: 400px; /* ✅ 너비 제한 */
   word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
   white-space: normal;     /* ✅ 줄바꿈 허용 */
   line-height: 1.3; /* ✅ 줄바꿈 시 높이 조절 */
