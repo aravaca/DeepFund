@@ -9,7 +9,7 @@ import yfinance as yf
 from collections import OrderedDict
 from flask import Response
 
-app = Flask(__name__, static_folder="cool-vue-app/dist", static_url_path="")
+app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 RECIPIENT_FILE = 'recipients.json'

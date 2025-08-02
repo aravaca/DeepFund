@@ -1,4 +1,4 @@
-cd cool-vue-app
+cd frontend
 npm run build
 cd ..
 git add .
