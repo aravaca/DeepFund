@@ -457,32 +457,6 @@ h1 {
   margin-bottom: 1px;
 }
 
-@media (max-width: 480px) {
-  .description {
-    font-size: 1.05rem;
-    font-weight: 500;
-    line-height: 1.6;
-    color: #444;
-  }
-
-  .ticker-list li {
-    font-size: 1rem;
-  }
-
-  .subscribe-form input,
-  .subscribe-form button {
-    font-size: 0.95rem;
-  }
-
-  .principle-popup {
-    right: auto;
-    left: 0;
-    min-width: 140px;
-    font-size: 0.92em;
-    padding: 12px 16px;
-  }
-}
-
 .typewriter {
   border-right: 2px solid #aaa;
   white-space: pre-wrap;
@@ -711,8 +685,74 @@ a.ticker {
 }
 
 @media (max-width: 480px) {
-  .ticker {
-    text-align: left;
+  .ticker-list li {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .rank {
+    width: 40px;
+    font-size: 0.9rem;
+  }
+
+  a.ticker {
+    width: 120px;
+    font-size: 0.95rem;
+  }
+
+  .change {
+    width: 90px;
+    font-size: 0.9rem;
+  }
+
+  .list-header span {
+    font-size: 0.85rem;
+  }
+
+  .list-header .rank {
+    width: 40px;
+  }
+
+  .list-header .ticker {
+    width: 120px;
+  }
+
+  .list-header .change {
+    width: 90px;
+  }
+
+  .report-box {
+    padding: 36px 20px;
+  }
+
+  .subscribe-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .subscribe-form input,
+  .subscribe-form button {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .principle-popup {
+    font-size: 0.9rem;
+    padding: 12px 14px;
+    min-width: auto;
+    max-width: 90vw;
+    left: 0;
+    right: auto;
+  }
+
+  
+  .description {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .logo {
+    max-width: 280px;
   }
 }
 
