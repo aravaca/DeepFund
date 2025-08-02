@@ -538,25 +538,26 @@ h1 {
   padding: 0;
   margin: 0 0 30px;
   list-style: none;
+  /* flex-direction: column-reverse; 필요에 따라 유지 또는 제거 */
 }
 
 .ticker-list li {
-  display: grid; /* grid 레이아웃 유지 */
-  grid-template-columns: inherit; /* 부모 grid 설정 상속 */
-  gap: inherit; /* 부모 gap 설정 상속 */
+  display: grid; /* display: contents; 대신 grid 사용 */
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  animation-fill-mode: forwards;
   animation-name: fadeInUp;
   animation-duration: 0.6s;
   animation-timing-function: ease-out;
-  animation-fill-mode: forwards;
   opacity: 0;
   transform: translateY(10px);
+  /* 아래 줄은 이미 .fade-in에서 처리하므로 중복 시 하나만 남겨도 됨 */
 }
-
 .rank {
   text-align: center;
   font-size: 1.1rem;
   font-family: 'Noto Sans KR', sans-serif;
-  /* grid-column: 1;  첫 번째 열 */
+  grid-column: 1; /* 첫 번째 열 */
 }
 
 a.ticker {
@@ -565,7 +566,7 @@ a.ticker {
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
-  /* grid-column: 2;  두 번째 열 */
+  grid-column: 2; /* 두 번째 열 */
   display: block;
   max-width: 100%;
   word-break: break-word;
@@ -581,7 +582,7 @@ a.ticker {
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
   font-weight: 400;
-  /* grid-column: 3;  세 번째 열 */
+  grid-column: 3; /* 세 번째 열 */
 }
 
 .change.positive {
