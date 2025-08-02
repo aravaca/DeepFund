@@ -481,6 +481,32 @@ h1 {
     font-size: 0.92em;
     padding: 12px 16px;
   }
+
+  .list-header span,
+  .ticker-list li > .rank,
+  .ticker-list li > .ticker-wrapper,
+  .ticker-list li > .change {
+    flex-basis: 70px;   /* 모바일에서 더 좁게 */
+    font-size: 0.95rem; /* 폰트 크기 줄임 */
+    padding: 0 2px;
+  }
+  .ticker-list li > .ticker-wrapper {
+    flex-basis: 110px;  /* 종목명은 조금 더 넓게 */
+  }
+  .ticker-list li {
+    font-size: 1rem;
+    gap: 6px;           /* gap 줄임 */
+    margin-bottom: 10px;
+  }
+  .rank, .change {
+    text-align: left;   /* 좌측 정렬 */
+    font-size: 0.95rem;
+  }
+  a.ticker {
+    font-size: 0.95rem;
+    max-width: 100px;   /* 모바일에서 너비 제한 */
+    text-align: left;
+  }
 }
 
 .typewriter {
@@ -520,14 +546,32 @@ h1 {
   color: #3b3b3b;
 }
 
-.list-header span {
-  flex: 1;
-  text-align: center;
-  font-family: 'Noto Sans KR', sans-serif; /* 명확히 지정 */
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #3b3b3b;
+.list-header span,
+.ticker-list li > .rank,
+.ticker-list li > .ticker-wrapper,
+.ticker-list li > .change {
+  flex-basis: 110px; /* 원하는 너비로 조정 (예: 110px) */
+  flex-shrink: 0;
+  flex-grow: 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
+.ticker-list li > .ticker-wrapper {
+  flex-basis: 180px; /* 종목명은 더 넓게 */
+}
+
+.ticker-list li {
+  gap: 0; /* gap 제거 */
+}
+
+a.ticker {
+  text-align: left; /* 좌측 정렬 */
+  margin: 0 auto;
+  max-width: 100%;
+  display: inline; /* block 대신 inline */
 }
 
 /* 종목 리스트 */
