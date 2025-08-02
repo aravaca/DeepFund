@@ -481,32 +481,6 @@ h1 {
     font-size: 0.92em;
     padding: 12px 16px;
   }
-
-  .list-header span,
-  .ticker-list li > .rank,
-  .ticker-list li > .ticker-wrapper,
-  .ticker-list li > .change {
-    flex-basis: 70px;   /* 모바일에서 더 좁게 */
-    font-size: 0.95rem; /* 폰트 크기 줄임 */
-    padding: 0 2px;
-  }
-  .ticker-list li > .ticker-wrapper {
-    flex-basis: 110px;  /* 종목명은 조금 더 넓게 */
-  }
-  .ticker-list li {
-    font-size: 1rem;
-    gap: 6px;           /* gap 줄임 */
-    margin-bottom: 10px;
-  }
-  .rank, .change {
-    text-align: left;   /* 좌측 정렬 */
-    font-size: 0.95rem;
-  }
-  a.ticker {
-    font-size: 0.95rem;
-    max-width: 100px;   /* 모바일에서 너비 제한 */
-    text-align: left;
-  }
 }
 
 .typewriter {
@@ -546,117 +520,61 @@ h1 {
   color: #3b3b3b;
 }
 
-.list-header span,
-.ticker-list li > .rank,
-.ticker-list li > .ticker-wrapper,
-.ticker-list li > .change {
-  flex-basis: 110px; /* 원하는 너비로 조정 (예: 110px) */
-  flex-shrink: 0;
-  flex-grow: 0;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
+.list-header span {
+  flex: 1;
+  text-align: center;
+  font-family: 'Noto Sans KR', sans-serif; /* 명확히 지정 */
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #3b3b3b;
 
-.ticker-list li > .ticker-wrapper {
-  flex-basis: 180px; /* 종목명은 더 넓게 */
-}
-
-.ticker-list li {
-  gap: 0; /* gap 제거 */
-}
-
-a.ticker {
-  text-align: left; /* 좌측 정렬 */
-  margin: 0 auto;
-  max-width: 100%;
-  display: inline; /* block 대신 inline */
 }
 
 /* 종목 리스트 */
 .ticker-list {
-  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* 순위, 종목명, 주가 비율 */
+  gap: 14px;
   padding: 0;
   margin: 0 0 30px;
-  display: flex;
-  flex-direction: column-reverse;
+  list-style: none;
+  flex-direction: column-reverse; /* 필요에 따라 유지 또는 제거 */
 }
 
 .ticker-list li {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 14px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #0066cc;
-  margin-bottom: 16px;
-  opacity: 0;
-  animation: fadeInSlide 0.6s forwards;
+  display: contents; /* grid의 자식 요소로 만듦 */
 }
 
 .rank {
-  flex: 1;
-  color: #2d3e50;
-  font-weight: 800;
   text-align: center;
   font-size: 1.1rem;
   font-family: 'Noto Sans KR', sans-serif;
+  grid-column: 1; /* 첫 번째 열 */
 }
 
 a.ticker {
-  flex: 1;
   text-align: center;
   color: #114477;
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
-  display: block; /* ✅ block 또는 flex 가능 */
-  max-width: 200px; /* ✅ 너비 제한 */
-  word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
-  white-space: normal;     /* ✅ 줄바꿈 허용 */
-  line-height: 1.3; /* ✅ 줄바꿈 시 높이 조절 */
-  transition: 
-    color 0.15s, 
-    background 0.15s, 
-    transform 0.2s ease-in-out;
+  grid-column: 2; /* 두 번째 열 */
+  display: block;
+  max-width: 100%;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  transition: color 0.15s, background 0.15s, transform 0.2s ease-in-out;
 }
-
-
-.ticker-wrapper {
-  position: relative;
-  display: inline-block;
-  max-width: 100%; /* 전체 너비 허용 */
-  word-break: break-word; /* 길면 단어 단위로 줄바꿈 */
-  white-space: normal; /* 줄바꿈 허용 */
-  text-align: center;
-}
-
-
-.magnifier {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  overflow: hidden;
-  pointer-events: none;
-  transform: scale(1.6);
-  transform-origin: top left;
-  z-index: 100;
-  display: none;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-}
-
 
 .change {
-  flex: 1;
-  font-size: 1.1rem;
   text-align: center;
+  font-size: 1.1rem;
   padding: 5px 12px;
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
   font-weight: 400;
+  grid-column: 3; /* 세 번째 열 */
 }
 
 .change.positive {
