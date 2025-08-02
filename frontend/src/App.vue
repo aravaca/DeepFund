@@ -541,9 +541,8 @@ h1 {
 
 .ticker-list li {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;  /* 요소 간 간격 균등하게 */
   align-items: center;
-  gap: 14px;
   font-size: 1.2rem;
   font-weight: 600;
   color: #0066cc;
@@ -553,6 +552,7 @@ h1 {
 }
 
 .rank {
+  width: 50px; 
   flex: 1;
   color: #2d3e50;
   font-weight: 800;
@@ -563,13 +563,14 @@ h1 {
 
 a.ticker {
   flex: 1;
-  text-align: left;
+  text-align: center;
   color: #114477;
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
   display: block; /* ✅ block 또는 flex 가능 */
   max-width: 200px; /* ✅ 너비 제한 */
+  width: 160px; 
   word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
   white-space: normal;     /* ✅ 줄바꿈 허용 */
   line-height: 1.3; /* ✅ 줄바꿈 시 높이 조절 */
@@ -606,9 +607,10 @@ a.ticker {
 
 
 .change {
+  width: 100px; 
   flex: 1;
   font-size: 1.1rem;
-  text-align: left;
+  text-align: center;
   padding: 5px 12px;
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
@@ -623,6 +625,16 @@ a.ticker {
 .change.negative {
   background-color: #fdecea;
   color: #c0392b;
+}
+
+.list-header .rank {
+  width: 50px;
+}
+.list-header .ticker {
+  width: 160px;
+}
+.list-header .change {
+  width: 100px;
 }
 
 /* 구독 폼 */
