@@ -202,7 +202,7 @@ onMounted(async () => {
   try {
     const res = await fetch('https://portfolio-production-54cf.up.railway.app/top-tickers')
     const data = await res.json()
-    tickers.value = data.tickers.reverse()
+    tickers.value = data.tickers
   } catch (e) {
     console.error('❌ 티커 로드 실패:', e)
   }
@@ -521,13 +521,17 @@ h1 {
 }
 
 .list-header span {
-  flex: 1;
+  flex: 0 0 48px;      /* 순위 */
   text-align: center;
-  font-family: 'Noto Sans KR', sans-serif; /* 명확히 지정 */
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #3b3b3b;
-
+}
+.list-header span.ticker {
+  flex: 1 1 0;         /* 종목명 */
+  text-align: left;
+  padding-left: 10px;
+}
+.list-header span.change {
+  flex: 0 0 110px;     /* 주가변동 */
+  text-align: center;
 }
 
 /* 종목 리스트 */
@@ -552,16 +556,12 @@ h1 {
 .rank {
   flex: 0 0 48px;
   text-align: center;
-  font-size: 1.1rem;
-  font-family: 'Noto Sans KR', sans-serif;
 }
-
 .ticker-wrapper {
   flex: 1 1 0;
   display: flex;
   align-items: center;
 }
-
 a.ticker {
   text-align: left;
   color: #114477;
@@ -579,22 +579,8 @@ a.ticker {
 .change {
   flex: 0 0 110px;
   text-align: center;
-  font-size: 1.1rem;
-  padding: 5px 12px;
-  border-radius: 12px;
-  transition: all 0.2s ease-in-out;
-  font-weight: 400;
 }
 
-.change.positive {
-  background-color: #e2f4e9;
-  color: #1e7b45;
-}
-
-.change.negative {
-  background-color: #fdecea;
-  color: #c0392b;
-}
 
 /* 구독 폼 */
 .subscribe-form {
