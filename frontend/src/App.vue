@@ -532,41 +532,42 @@ h1 {
 
 /* 종목 리스트 */
 .ticker-list {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* 순위, 종목명, 주가 비율 */
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   padding: 0;
   margin: 0 0 30px;
   list-style: none;
-  /* flex-direction: column-reverse; 필요에 따라 유지 또는 제거 */
+
 }
 
 .ticker-list li {
-  display: grid; /* display: contents; 대신 grid 사용 */
-  grid-template-columns: 1fr 2fr 1fr;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  animation-fill-mode: forwards;
-  animation-name: fadeInUp;
-  animation-duration: 0.6s;
-  animation-timing-function: ease-out;
-  opacity: 0;
-  transform: translateY(10px);
-  /* 아래 줄은 이미 .fade-in에서 처리하므로 중복 시 하나만 남겨도 됨 */
+  min-height: 38px;
+  margin-bottom: 8px;
 }
+
 .rank {
+  flex: 0 0 48px;
   text-align: center;
   font-size: 1.1rem;
   font-family: 'Noto Sans KR', sans-serif;
-  grid-column: 1; /* 첫 번째 열 */
+}
+
+.ticker-wrapper {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
 }
 
 a.ticker {
-  text-align: center;
+  text-align: left;
   color: #114477;
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
-  grid-column: 2; /* 두 번째 열 */
   display: block;
   max-width: 100%;
   word-break: break-word;
@@ -576,13 +577,13 @@ a.ticker {
 }
 
 .change {
+  flex: 0 0 110px;
   text-align: center;
   font-size: 1.1rem;
   padding: 5px 12px;
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
   font-weight: 400;
-  grid-column: 3; /* 세 번째 열 */
 }
 
 .change.positive {
