@@ -202,7 +202,7 @@ onMounted(async () => {
   try {
     const res = await fetch('https://portfolio-production-54cf.up.railway.app/top-tickers')
     const data = await res.json()
-    tickers.value = data.tickers
+    tickers.value = data.tickers.reverse()
   } catch (e) {
     console.error('❌ 티커 로드 실패:', e)
   }
@@ -521,66 +521,109 @@ h1 {
 }
 
 .list-header span {
-  flex: 0 0 48px;      /* 순위 */
+  flex: 1;
   text-align: center;
-}
-.list-header span.ticker {
-  flex: 1 1 0;         /* 종목명 */
-  text-align: left;
-  padding-left: 10px;
-}
-.list-header span.change {
-  flex: 0 0 110px;     /* 주가변동 */
-  text-align: center;
+  font-family: 'Noto Sans KR', sans-serif; /* 명확히 지정 */
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #3b3b3b;
+
 }
 
 /* 종목 리스트 */
 .ticker-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  list-style: none;
   padding: 0;
   margin: 0 0 30px;
-  list-style: none;
-
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .ticker-list li {
   display: flex;
-  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  min-height: 38px;
-  margin-bottom: 8px;
+  gap: 14px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #0066cc;
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: fadeInSlide 0.6s forwards;
 }
 
 .rank {
-  flex: 0 0 48px;
+  flex: 1;
+  color: #2d3e50;
+  font-weight: 800;
   text-align: center;
+  font-size: 1.1rem;
+  font-family: 'Noto Sans KR', sans-serif;
 }
-.ticker-wrapper {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-}
+
 a.ticker {
+  flex: 1;
   text-align: left;
   color: #114477;
   letter-spacing: 0.01em;
   font-weight: 500;
   text-decoration: none;
-  display: block;
-  max-width: 100%;
-  word-break: break-word;
-  white-space: normal;
-  line-height: 1.3;
-  transition: color 0.15s, background 0.15s, transform 0.2s ease-in-out;
+  display: block; /* ✅ block 또는 flex 가능 */
+  max-width: 200px; /* ✅ 너비 제한 */
+  word-break: break-word; /* ✅ 단어 단위로 줄바꿈 */
+  white-space: normal;     /* ✅ 줄바꿈 허용 */
+  line-height: 1.3; /* ✅ 줄바꿈 시 높이 조절 */
+  transition: 
+    color 0.15s, 
+    background 0.15s, 
+    transform 0.2s ease-in-out;
 }
 
-.change {
-  flex: 0 0 110px;
+
+.ticker-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%; /* 전체 너비 허용 */
+  word-break: break-word; /* 길면 단어 단위로 줄바꿈 */
+  white-space: normal; /* 줄바꿈 허용 */
   text-align: center;
 }
 
+
+.magnifier {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: scale(1.6);
+  transform-origin: top left;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+
+.change {
+  flex: 1;
+  font-size: 1.1rem;
+  text-align: left;
+  padding: 5px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
+  font-weight: 400;
+}
+
+.change.positive {
+  background-color: #e2f4e9;
+  color: #1e7b45;
+}
+
+.change.negative {
+  background-color: #fdecea;
+  color: #c0392b;
+}
 
 /* 구독 폼 */
 .subscribe-form {
