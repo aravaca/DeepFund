@@ -68,17 +68,17 @@ marketaux_api = os.environ["MARKETAUX_API"]
 NUM_THREADS = 2  # multithreading
 
 country = "US"
-limit = 10  # max 250 requests/day #
+limit = 200  # max 250 requests/day #
 sp500 = True
 
 # top X tickers to optimize
-opt = 2
+opt = 20
 
 # for news
-news_lookup = 0
+news_lookup = 100
 
 # for moat
-moat_limit = 2
+moat_limit = 200
 #########################################################
 
 
@@ -1271,7 +1271,7 @@ def analyze_moat(company_name: str, date_kr_ymd: str) -> str:
 
 ```json
 {{
-  "moat_analysis": "기업의 중장기 핵심 경쟁 우위 및 Value Trap 위험성 요약 (2~3줄 이내)",
+  "moat_analysis": "기업의 중장기 핵심 경쟁 우위 및 Value Trap 위험성 요약 (반드시 2~3줄 이내 요약)",
   "moat_score": 0,  // 0에서 10 사이 정수 (아래 기준 참고)
 }}
 
@@ -1769,10 +1769,11 @@ top_tickers_news = df["티커"].head(news_lookup).tolist()
 
 
 # 참고: 실제 운영 환경에서는 7초 이상(예: 8~10초)로 여유 있게 설정하면 더 안전함
+
 def generate_moat_summary_batch(
-    df: pd.DataFrame, moat_limit: int, batch_size: int = 10, sleep_time: int = 8
+    df: pd.DataFrame, batch_size: int = 10, sleep_time: int = 8
 ) -> pd.DataFrame:
-    top_tickers = df["종목"].head(moat_limit).tolist()
+    top_tickers = df["종목"].tolist()
     moat_data = []
 
     for i in range(0, len(top_tickers), batch_size):
@@ -1806,7 +1807,7 @@ def generate_moat_summary_batch(
     return pd.DataFrame(moat_data)
 
 
-moat_df = generate_moat_summary_batch(df, moat_limit)
+moat_df = generate_moat_summary_batch(df, batch_size=10, sleep_time=8)
 # def generate_moat_summary(df: pd.DataFrame, moat_limit: int) -> pd.DataFrame:
 #     top_tickers = df['종목'].head(moat_limit).tolist()
 

@@ -8,6 +8,8 @@ import pandas as pd
 import yfinance as yf
 from collections import OrderedDict
 from flask import Response
+excel_path = os.path.join(os.path.dirname(__file__), "deep_fund.xlsx")
+
 
 app = Flask(__name__, static_folder="dist", static_url_path="")
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -129,7 +131,7 @@ def market_data():
 
 @app.route("/top-tickers")
 def top_tickers():
-    df = pd.read_excel("backend/deep_fund.xlsx", sheet_name="종목분석")
+    df = pd.read_excel(excel_path, sheet_name="종목분석")
 
     df_top = df.head(15)
     unique_tickers = []
