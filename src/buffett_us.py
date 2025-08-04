@@ -35,6 +35,10 @@ from google.genai import types
 import json
 import markdown
 
+# 현재 파일 (src/buffett_us.py) 기준으로 프로젝트 루트 경로
+project_root = os.path.dirname(os.path.dirname(__file__))
+# backend 경로로 엑셀 저장
+excel_path = os.path.join(project_root, "backend", "deep_fund.xlsx")
 
 ################ DEPENDENCIES ###########################
 
@@ -64,17 +68,17 @@ marketaux_api = os.environ["MARKETAUX_API"]
 NUM_THREADS = 2  # multithreading
 
 country = "US"
-limit = 200  # max 250 requests/day #
+limit = 10  # max 250 requests/day #
 sp500 = True
 
 # top X tickers to optimize
-opt = 20
+opt = 2
 
 # for news
-news_lookup = 100
+news_lookup = 0
 
 # for moat
-moat_limit = 200
+moat_limit = 2
 #########################################################
 
 
@@ -1737,7 +1741,7 @@ df = df.drop_duplicates(subset="티커", keep="first")
 
 
 # 그리고 그대로 저장
-df.to_excel("deep_fund.xlsx", index=False)
+df.to_excel(excel_path, index=False)
 
 
 # 6) 상위 티커 리스트 추출
@@ -2301,9 +2305,6 @@ for method, data in portfolio_data.items():
     stats_rows.append(stats_dict)
 df_stats = pd.DataFrame(stats_rows)
 
-filename = "deep_fund.xlsx"
-
-
 def autofit_columns_and_wrap(ws, df: pd.DataFrame, workbook):
     # 픽셀 -> 문자 수 환산 (0.1428 배율 기준)
     pixel_widths = [92, 200, 50, 500, 85, 150]
@@ -2370,7 +2371,7 @@ def autofit_columns_and_wrap_moat(ws, df: pd.DataFrame, workbook):
                 ws.write(row, col, str(val), wrap_format)
 
 
-with pd.ExcelWriter(filename, engine="xlsxwriter") as writer:
+with pd.ExcelWriter(excel_path, engine="xlsxwriter") as writer:
 
     # 종목분석 시트 먼저 생성해야 함
     df.to_excel(
@@ -2521,14 +2522,6 @@ with pd.ExcelWriter(filename, engine="xlsxwriter") as writer:
         },
     )
 
-
-##########################################################################################################
-time.sleep(3)
-
-excel_path = "deep_fund.xlsx"
-
-
-#########################################################################################################
 def generate_prompt(df_news: pd.DataFrame) -> str:
 
     news_summary = []
@@ -2693,7 +2686,7 @@ with open(excel_path, "rb") as f:
         f.read(),
         maintype="application",
         subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename=excel_path,
+        filename="DeepFund_Weekly_Insights.xlsx",
     )
 
 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
