@@ -12,11 +12,13 @@ from flask import Response
 app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-RECIPIENT_FILE = 'recipients.json'
+RECIPIENT_FILE = "recipients.json"
 
-@app.route('/')
+
+@app.route("/")
 def serve_vue():
-    return app.send_static_file('index.html')
+    return app.send_static_file("index.html")
+
 
 def push_recipients_json():
     repo = "pozuelodealarcon/Portfolio"
@@ -34,7 +36,7 @@ def push_recipients_json():
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
     r = requests.get(url, headers=headers)
     if r.status_code == 200:
@@ -45,7 +47,7 @@ def push_recipients_json():
     data = {
         "message": "Update recipients.json from Railway",
         "content": b64_content,
-        "branch": branch
+        "branch": branch,
     }
     if sha:
         data["sha"] = sha
@@ -84,21 +86,23 @@ def subscribe():
         return jsonify({"message": f"❌ GitHub 업로드 실패: {msg}"}), 500
 
 
-@app.route('/api/market-data')
+@app.route("/api/market-data")
 def market_data():
-    indices = OrderedDict([
-        ("S&P500", "^GSPC"),
-        ("NASDAQ", "^IXIC"),
-        ("Dow Jones", "^DJI"),
-        ("KOSPI", "^KS11"),
-        ("KOSDAQ", "^KQ11"),
-        ("USD/KRW", "USDKRW=X"),
-        ("BTC/USD", "BTC-USD"),
-        ("ETH/USD", "ETH-USD"),
-        ("Gold", "GC=F"),
-        ("WTI", "CL=F"),
-        ("Brent", "BZ=F"),
-    ])
+    indices = OrderedDict(
+        [
+            ("S&P500", "^GSPC"),
+            ("NASDAQ", "^IXIC"),
+            ("Dow Jones", "^DJI"),
+            ("KOSPI", "^KS11"),
+            ("KOSDAQ", "^KQ11"),
+            ("USD/KRW", "USDKRW=X"),
+            ("BTC/USD", "BTC-USD"),
+            ("ETH/USD", "ETH-USD"),
+            ("Gold", "GC=F"),
+            ("WTI", "CL=F"),
+            ("Brent", "BZ=F"),
+        ]
+    )
 
     data = OrderedDict()
     for name, symbol in indices.items():
@@ -107,8 +111,8 @@ def market_data():
         if len(hist) < 2:
             continue
 
-        price_today = hist['Close'].iloc[1]
-        price_yesterday = hist['Close'].iloc[0]
+        price_today = hist["Close"].iloc[1]
+        price_yesterday = hist["Close"].iloc[0]
 
         change = price_today - price_yesterday
         percent_change = (change / price_yesterday) * 100
@@ -116,34 +120,32 @@ def market_data():
         sign = "▲" if change > 0 else "▼" if change < 0 else "-"
         data[name] = {
             "price": round(price_today, 2),
-            "change": f"{sign} {abs(percent_change):.2f}%"
+            "change": f"{sign} {abs(percent_change):.2f}%",
         }
 
     json_str = json.dumps(data, ensure_ascii=False)
-    return Response(json_str, mimetype='application/json')
+    return Response(json_str, mimetype="application/json")
 
-@app.route('/top-tickers')
+
+@app.route("/top-tickers")
 def top_tickers():
     df = pd.read_excel("deep_fund.xlsx", sheet_name="종목분석")
-    
+
     df_top = df.head(15)
     unique_tickers = []
     tickers = []
 
     for _, row in df_top.iterrows():
-        ticker = row['종목']
+        ticker = row["종목"]
         if ticker not in unique_tickers:
             unique_tickers.append(ticker)
-            tickers.append({
-                "ticker": str(ticker),
-                "change": str(row['1개월대비'])
-            })
+            tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
         if len(tickers) == 10:
             break
 
-
     return jsonify({"tickers": tickers})
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
