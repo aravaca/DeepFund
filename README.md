@@ -25,14 +25,34 @@
 ## 📁 Directory Structure
 
 ```
-src/
-├── buffett_us.py         # Main analysis script
-cool-vue-app/src/
-├── App.vue             # Vue.js frontend for subscription web
-server.py                # Flask backend for managing email subscriptions
-recipients.json       # Auto-updated subscriber email list
+. (root)
+├── README.md
+├── backend
+│   ├── deep_fund.xlsx
+│   ├── dist
+│   ├── recipients.json # Auto-updated subscriber email list
+│   ├── requirements.txt
+│   ├── server.py # Flask backend for managing email subscriptions
+│   └── yf_cache_multi.csv
+├── frontend
+│   ├── README.md
+│   ├── dist
+│   ├── index.html
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   ├── src
+│   │    ├── App.vue # frontend web for displaying top tickers of the month and receiving subscription requests
+│   └── vite.config.js
+└── src
+    ├── __pycache__
+    ├── backtest_buffett_us.py
+    ├── buffett_krx.py
+    ├── buffett_us.py # Main analysis script for the US market
+    ├── buffett_us_old.py
+    └── yf_cache_downloader.py
 ```
-
 ---
 
 ## 1. Algorithm Logic
