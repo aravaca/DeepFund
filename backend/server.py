@@ -9,10 +9,10 @@ import yfinance as yf
 from collections import OrderedDict
 from flask import Response
 
-app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
+app = Flask(__name__, static_folder="../frontend/dist", static_url_path="")
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-RECIPIENT_FILE = "recipients.json"
+RECIPIENT_FILE = "backend/recipients.json"
 
 
 @app.route("/")
@@ -22,7 +22,7 @@ def serve_vue():
 
 def push_recipients_json():
     repo = "pozuelodealarcon/Portfolio"
-    path = "recipients.json"
+    path = RECIPIENT_FILE
     branch = "main"
     token = os.getenv("GITHUB_TOKEN")
 
@@ -65,11 +65,11 @@ def subscribe():
     if not email:
         return jsonify({"message": "⚠️ 유효한 이메일이 아닙니다."}), 400
 
-    if not os.path.exists("recipients.json"):
-        with open("recipients.json", "w") as f:
+    if not os.path.exists(RECIPIENT_FILE):
+        with open(RECIPIENT_FILE, "w") as f:
             json.dump([], f)
 
-    with open("recipients.json", "r+") as f:
+    with open(RECIPIENT_FILE, "r+") as f:
         data = json.load(f)
         if email in data:
             return jsonify({"message": "⚠️ 이미 등록된 이메일입니다."}), 400
@@ -129,7 +129,7 @@ def market_data():
 
 @app.route("/top-tickers")
 def top_tickers():
-    df = pd.read_excel("deep_fund.xlsx", sheet_name="종목분석")
+    df = pd.read_excel("backend/deep_fund.xlsx", sheet_name="종목분석")
 
     df_top = df.head(15)
     unique_tickers = []

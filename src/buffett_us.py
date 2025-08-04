@@ -64,17 +64,17 @@ marketaux_api = os.environ["MARKETAUX_API"]
 NUM_THREADS = 2  # multithreading
 
 country = "US"
-limit = 200  # max 250 requests/day #
+limit = 10  # max 250 requests/day #
 sp500 = True
 
 # top X tickers to optimize
-opt = 20
+opt = 2
 
 # for news
-news_lookup = 100
+news_lookup = 0
 
 # for moat
-moat_limit = 200
+moat_limit = 2
 #########################################################
 
 

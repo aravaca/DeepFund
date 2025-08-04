@@ -4,7 +4,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
-CACHE_FILE = "yf_cache_multi.csv"  # Path to your cached price data
+CACHE_FILE = "backend/yf_cache_multi.csv"  # Path to your cached price data
 BENCHMARK = "^GSPC"  # S&P 500
 REBALANCE_FREQ = "M"  # Monthly rebalancing
 TOP_N = 5  # Number of top stocks to hold

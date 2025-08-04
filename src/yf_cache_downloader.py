@@ -4,7 +4,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 import requests
 
-CACHE_FILE = "yf_cache_multi.csv"
+CACHE_FILE = "backend/yf_cache_multi.csv"
 limit = 300
 api_key = os.environ["FMP_API_KEY"]
 
