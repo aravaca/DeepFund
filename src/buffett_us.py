@@ -48,8 +48,10 @@ excel_path = os.path.join(project_root, "backend", "deep_fund.xlsx")
 recipients = ["chs_3411@naver.com", "eljm2080@gmail.com", "hyungsukchoi3411@gmail.com"]
 
 # JSON에서 이메일 불러오기
+
 try:
-    with open("recipients.json", "r") as f:
+    recipients_json_path = os.path.join(project_root, "backend", "recipients.json")
+    with open(recipients_json_path, "r") as f:
         loaded_emails = json.load(f)
         for email in loaded_emails:
             if email not in recipients:
@@ -634,22 +636,22 @@ def get_percentage_change(ticker):
     else:
         return " ()"
 
-
 def get_percentage_change_ttm(ticker):
     ticker_obj = yf.Ticker(ticker)
-
-    # Get start of the current month
     today = date.today()
     start_of_month = today.replace(day=1)
 
     # Fetch price data from start of month to today
-    data = ticker_obj.history(start=start_of_month, end=today)
 
+    data = ticker_obj.history(start=start_of_month, end=today + timedelta(days=1))
+    print(data)
+    
     if len(data) >= 2:
+        # Use the first available trading day as the start
         start_close = data["Close"].iloc[0]
         end_close = data["Close"].iloc[-1]
 
-        if start_close != 0:
+        if start_close and not pd.isna(start_close):
             percent_change = ((end_close - start_close) / start_close) * 100
             sign = "+" if percent_change >= 0 else ""
             return f" ({sign}{percent_change:.2f}%)"
@@ -1267,7 +1269,7 @@ def analyze_moat(company_name: str, date_kr_ymd: str) -> str:
 
 ---
 
-📤 아래 JSON 형식으로 답변해 주세요:
+📤 **반드시 아래 형식의 JSON으로만 간결하게 출력하십시오. 추가 설명이나 상세 분석은 포함하지 마십시오.**
 
 ```json
 {{
