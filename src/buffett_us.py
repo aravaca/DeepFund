@@ -1068,6 +1068,14 @@ def score_momentum(ma, ma_lt, ret_20d, ret_60d, rsi, macd):
     if ma_lt:  # 장기 MA 크로스 오버 신호 (True/False)
         score += 15
 
+    # RSI 과매도 반등 (True/False)
+    if rsi:
+        score += 20
+
+    # MACD 골든크로스 (True/False)
+    if macd:
+        score += 20
+
     # 단기 수익률 반영 (예: 20일 수익률)
     if ret_20d is not None:
         if ret_20d > 0:
@@ -1077,14 +1085,11 @@ def score_momentum(ma, ma_lt, ret_20d, ret_60d, rsi, macd):
     if ret_60d is not None:
         if ret_60d > 0:
             score += min(ret_60d * 100, 15)  # 0~15점
+        # else:
+        #     curr_score = score # 현재 점수
+        #     curr_score = curr_score * 0.5
+        #     score = max(score + ret_60d * 100, curr_score)
 
-    # RSI 과매도 반등 (True/False)
-    if rsi:
-        score += 20
-
-    # MACD 골든크로스 (True/False)
-    if macd:
-        score += 20
 
     return round(score, 2)
 
@@ -1286,7 +1291,7 @@ Moat Score 기준 (0~10):
 8-9: 뚜렷하고 장기적 경쟁 우위, 강력한 진입 장벽과 네트워크 효과 존재  
 10: 절대적 독점 우위, 대체 불가능하며 진입 불가 수준  
 
-※ 경쟁 우위가 약하거나 Value Trap 위험이 감지되면 점수를 낮게, 보수적으로 산정하십시오.  
+※ 경쟁 우위가 약하거나 Value Trap 위험이 감지되면 점수를 강하게 감점하고, 보수적으로 산정하십시오.  
 """
     return prompt.strip()
 
