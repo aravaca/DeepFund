@@ -636,6 +636,7 @@ def get_percentage_change(ticker):
     else:
         return " ()"
 
+
 def get_percentage_change_ttm(ticker):
     ticker_obj = yf.Ticker(ticker)
     today = date.today()
@@ -645,7 +646,7 @@ def get_percentage_change_ttm(ticker):
 
     data = ticker_obj.history(start=start_of_month, end=today + timedelta(days=1))
     print(data)
-    
+
     if len(data) >= 2:
         # Use the first available trading day as the start
         start_close = data["Close"].iloc[0]
@@ -1090,7 +1091,6 @@ def score_momentum(ma, ma_lt, ret_20d, ret_60d, rsi, macd):
         #     curr_score = curr_score * 0.5
         #     score = max(score + ret_60d * 100, curr_score)
 
-
     return round(score, 2)
 
 
@@ -1267,9 +1267,9 @@ def analyze_moat(company_name: str, date_kr_ymd: str) -> str:
 
 ---
 
-⚠️ [감점 요인: {date_kr_ymd} 기준 Value Trap 시그널 존재 시 강한 감점]  
+⚠️ [감점 요인: {date_kr_ymd} 기준 Value Trap 시그널 하나라도 존재 시 강한 감점]  
 - 본질적 펀더멘털 붕괴 징후  
-- 경쟁사의 기술 혁신에 밀려 장기 시장 점유율 하락  
+- 경쟁사의 기술 혁신에 밀려 시장 점유율 하락
 - 성장 산업 내 수익성·현금흐름·점유율 동반 하락  
 
 ---
@@ -1291,7 +1291,7 @@ Moat Score 기준 (0~10):
 8-9: 뚜렷하고 장기적 경쟁 우위, 강력한 진입 장벽과 네트워크 효과 존재  
 10: 절대적 독점 우위, 대체 불가능하며 진입 불가 수준  
 
-※ 경쟁 우위가 약하거나 Value Trap 위험이 감지되면 점수를 강하게 감점하고, 보수적으로 산정하십시오.  
+※ 경쟁 우위가 약하거나 Value Trap 위험이 하나라도 감지되면 점수를 강하게 감점하고, 보수적으로 산정하십시오.  
 """
     return prompt.strip()
 
@@ -1776,6 +1776,7 @@ top_tickers_news = df["티커"].head(news_lookup).tolist()
 
 
 # 참고: 실제 운영 환경에서는 7초 이상(예: 8~10초)로 여유 있게 설정하면 더 안전함
+
 
 def generate_moat_summary_batch(
     df: pd.DataFrame, batch_size: int = 10, sleep_time: int = 8
@@ -2283,6 +2284,7 @@ for method, data in portfolio_data.items():
     stats_rows.append(stats_dict)
 df_stats = pd.DataFrame(stats_rows)
 
+
 def autofit_columns_and_wrap(ws, df: pd.DataFrame, workbook):
     # 픽셀 -> 문자 수 환산 (0.1428 배율 기준)
     pixel_widths = [92, 200, 50, 500, 85, 150]
@@ -2499,6 +2501,7 @@ with pd.ExcelWriter(excel_path, engine="xlsxwriter") as writer:
             "max_color": "#00FF00",
         },
     )
+
 
 def generate_prompt(df_news: pd.DataFrame) -> str:
 

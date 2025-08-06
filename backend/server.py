@@ -8,6 +8,7 @@ import pandas as pd
 import yfinance as yf
 from collections import OrderedDict
 from flask import Response
+
 excel_path = os.path.join(os.path.dirname(__file__), "deep_fund.xlsx")
 
 
