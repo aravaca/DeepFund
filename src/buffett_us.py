@@ -1752,7 +1752,7 @@ df.to_excel(excel_path, index=False)
 
 
 # 6) 상위 티커 리스트 추출
-top_tickers = df["티커"].head(opt).tolist()
+
 top_tickers_news = df["티커"].head(news_lookup).tolist()
 
 
@@ -1815,38 +1815,7 @@ def generate_moat_summary_batch(
 
 
 moat_df = generate_moat_summary_batch(df, batch_size=10, sleep_time=8)
-# def generate_moat_summary(df: pd.DataFrame, moat_limit: int) -> pd.DataFrame:
-#     top_tickers = df['종목'].head(moat_limit).tolist()
 
-#     moat_data = []
-
-#     for ticker in top_tickers:
-#         try:
-#             # 프롬프트 생성 및 Gemini 질의
-#             prompt = analyze_moat(ticker)
-#             moat_text = query_gemini(prompt)
-#             parsed_response = parse_moat_response(moat_text)
-
-
-#             moat_data.append({
-#                 '기업명': ticker,
-#                 '경쟁 우위 분석': parsed_response["moat_analysis"],
-#                 'Moat 점수': parsed_response["moat_score"],
-#             })
-
-#             # 요청 사이 딜레이 (선택적: Gemini 또는 API 제한 회피용)
-#             time.sleep(1)
-
-#         except Exception as e:
-#             moat_data.append({
-#                 '기업명': f"❌ 오류: {str(e)}",
-#                 '경쟁 우위 분석': "분석 실패",
-#                 'Moat 점수': "분석 실패",
-#             })
-
-#     return pd.DataFrame(moat_data)
-
-# moat_df = generate_moat_summary(df, moat_limit)
 
 #################################################################
 # 1. ticker / 기업명 기준으로 moat_df를 df에 merge
@@ -1865,10 +1834,10 @@ df["moat_score_norm"] = normalize_series(df["Moat 점수"])
 
 
 # 4. 기존 가중치 설정 (예: Buffett 스타일에 Moat 포함)
-valuation_weight = 0.4
+valuation_weight = 0.35
+moat_weight = 0.35  # Moat 가중치 (조절 가능)
 momentum_weight = 0.2
 price_flow_weight = 0.1
-moat_weight = 0.3  # Moat 가중치 (조절 가능)
 
 # 5. 새 total_score 계산
 df["총점수"] = (
@@ -1969,7 +1938,8 @@ news_df = get_news_for_tickers(top_tickers_news, api_token=marketaux_api)
 
 # Seleccionar Criterio de Optimización
 optimization_criterion = "sortino"  # Cambia a 'sharpe', 'cvar', 'sortino' o 'variance' para optimizar esos criterios
-
+df = df.sort_values(by="총점수", ascending=False).reset_index(drop=True)
+top_tickers = df["티커"].head(opt).tolist()
 symbols = top_tickers
 
 # 오늘 날짜
