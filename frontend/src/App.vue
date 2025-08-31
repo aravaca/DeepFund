@@ -178,7 +178,7 @@ const updateRibbon = async () => {
 
 const submitEmail = async () => {
   try {
-    const response = await fetch('https://3.21.6.102/subscribe', {
+    const response = await fetch('https://portfolio-production-54cf.up.railway.app/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value }),
@@ -200,7 +200,7 @@ function handleClickOutside(e) {
 onMounted(async () => {
   // ① 종목 데이터 로드
   try {
-    const res = await fetch('https://3.21.6.102/top-tickers')
+    const res = await fetch('https://portfolio-production-54cf.up.railway.app/top-tickers')
     const data = await res.json()
     tickers.value = data.tickers.reverse()
   } catch (e) {
