@@ -1219,8 +1219,8 @@ def keep_ticker(t):
 
 tickers = list(filter(keep_ticker, raw_tickers))
 ################################################################################
-from yf_cache_downloader import 
-_country_cache, update_cache
+from yf_cache_downloader import get_tickers_by_country_cache, update_cache
+
 
 # 예) 티커 리스트 받아오기 (limit, api_key는 yf_cache_downloader.py 내부 또는 외부에서 설정 가능)
 tickers_for_cache = get_tickers_by_country_cache("US", limit=300, apikey=fmp_key)
