@@ -13,6 +13,8 @@ from queue import Queue
 import threading
 import time
 import polars as pl
+import io
+from yahooquery import Ticker
 
 # import shelve
 from bs4 import BeautifulSoup
@@ -70,7 +72,16 @@ marketaux_api = os.environ["MARKETAUX_API"]
 NUM_THREADS = 2  # multithreading
 
 country = "US"
-limit = 200  # max 250 requests/day #
+
+## IMPORTANT!! limit must match NYSE + NASDAQ #######
+
+limit = 300  # max 250 requests/day #
+NYSE= 200
+NASDAQ = 100
+
+## IMPORTANT!! limit must match NYSE + NASDAQ #######
+
+
 sp500 = True
 
 # top X tickers to optimize
@@ -143,53 +154,77 @@ def get_tickers(country: str, limit: int, sp500: bool):
     else:
         raise Exception("No tickers list satisfies the given parameter")
 
+NASDAQ_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
+OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt"
 
+def _read_symbol_file(url: str) -> pd.DataFrame:
+    txt = requests.get(url, timeout=20).text
+    # drop footer lines like "File Creation Time: ..."
+    lines = [ln for ln in txt.splitlines() if not ln.startswith("File Creation")]
+    return pd.read_csv(io.StringIO("\n".join(lines)), sep="|")
+
+def load_nyse_symbols() -> list[str]:
+    df = _read_symbol_file(OTHER_LISTED_URL)
+    # 'N' = NYSE, exclude ETFs/test issues
+    nyse = df[(df["Exchange"] == "N") & (df["ETF"] == "N") & (df["Test Issue"] == "N")]
+    return sorted(nyse["ACT Symbol"].dropna().astype(str).unique().tolist())
+
+def load_nasdaq_symbols() -> list[str]:
+    df = _read_symbol_file(NASDAQ_LISTED_URL)
+    # exclude ETFs/test issues; NASDAQ file has flags
+    # Some files have "ETF" column; if missing, default False
+    if "ETF" in df.columns:
+        nas = df[(df["ETF"] == "N") & (df["Test Issue"] == "N")]
+    else:
+        nas = df[df["Test Issue"] == "N"]
+    return sorted(nas["Symbol"].dropna().astype(str).unique().tolist())
+
+def _chunks(lst, size=400):
+    for i in range(0, len(lst), size):
+        yield lst[i:i+size]
+
+def fetch_market_caps(tickers: list[str]) -> pd.DataFrame:
+    rows = []
+    for chunk in _chunks(tickers, 400):
+        yq = Ticker(chunk, asynchronous=True)
+        price = yq.price  # dict: {symbol: {...}}
+        for sym, info in (price or {}).items():
+            if not isinstance(info, dict):
+                continue
+            mc = info.get("marketCap")
+            if isinstance(mc, (int, float)) and mc > 0:
+                rows.append((sym, mc))
+    return pd.DataFrame(rows, columns=["Ticker", "MarketCap"])
+
+def top_by_marketcap(symbols: list[str], n: int | None = None) -> pd.DataFrame:
+    df = fetch_market_caps(symbols)
+    df = df.sort_values("MarketCap", ascending=False).reset_index(drop=True)
+    return df if n is None else df.head(n).copy()
+
+def get_ordered_lists(n_nyse: int = 500, n_nasdaq: int = 500):
+    nyse_syms = load_nyse_symbols()
+    nasdaq_syms = load_nasdaq_symbols()
+
+    nyse_top = top_by_marketcap(nyse_syms, n_nyse) # DataFrame: Ticker, MarketCap
+    nasdaq_top = top_by_marketcap(nasdaq_syms, n_nasdaq) # DataFrame: Ticker, MarketCap
+
+    # If you want one combined ranking across both:
+    combined = pd.concat([
+        nyse_top.assign(Exchange="NYSE"),
+        nasdaq_top.assign(Exchange="NASDAQ")
+    ], ignore_index=True).sort_values("MarketCap", ascending=False).reset_index(drop=True)
+
+    # Also return as Python lists if you only need tickers
+    nyse_list = nyse_top["Ticker"].tolist()
+    nasdaq_list = nasdaq_top["Ticker"].tolist()
+    return nyse_list, nasdaq_list, nyse_top, nasdaq_top, combined
+
+# Example:
 def get_tickers_by_country(country: str, limit: int, apikey: str):
-    url = "https://financialmodelingprep.com/api/v3/stock-screener"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-    }
 
-    exchanges = ["nyse", "nasdaq", "amex"]
-    all_stocks = []
+    nyse_500, nasdaq_500, nyse_df, nasdaq_df, combined_df = get_ordered_lists(NYSE, NASDAQ)
 
-    try:
-        for exchange in exchanges:
-            params = {
-                "exchange": exchange,
-                "limit": 500,  # 넉넉히 가져오기
-                "type": "stock",
-                "isEtf": False,
-                "isFund": False,
-                "apikey": apikey,
-            }
-            r = requests.get(url, headers=headers, params=params)
-            r.raise_for_status()
-            data = r.json()
-            all_stocks.extend(data)
-
-        # 시가총액 기준 정렬
-        sorted_stocks = sorted(
-            all_stocks, key=lambda x: x.get("marketCap", 0), reverse=True
-        )
-
-        # 중복 제거 및 상위 limit만 추출
-        seen = set()
-        unique_sorted = []
-        for stock in sorted_stocks:
-            symbol = stock.get("symbol")
-            if symbol and symbol not in seen:
-                seen.add(symbol)
-                unique_sorted.append(symbol)
-            if len(unique_sorted) >= limit:
-                break
-
-        return unique_sorted
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return []
+    return nyse_500 + nasdaq_500
 
 
 def safe_check(val):
@@ -1184,7 +1219,8 @@ def keep_ticker(t):
 
 tickers = list(filter(keep_ticker, raw_tickers))
 ################################################################################
-from yf_cache_downloader import get_tickers_by_country_cache, update_cache
+from yf_cache_downloader import 
+_country_cache, update_cache
 
 # 예) 티커 리스트 받아오기 (limit, api_key는 yf_cache_downloader.py 내부 또는 외부에서 설정 가능)
 tickers_for_cache = get_tickers_by_country_cache("US", limit=300, apikey=fmp_key)

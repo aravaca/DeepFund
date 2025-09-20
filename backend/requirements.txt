@@ -19,3 +19,4 @@ flask
 flask-cors
 PyGithub
 markdown==3.8.2
+yahooquery==2.4.1
