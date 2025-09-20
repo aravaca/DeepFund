@@ -662,113 +662,455 @@ def get_percentage_change_ttm(ticker):
         return " ()"
 
 
-def download_industry_per():
-    # FullRatio의 산업별 PER 페이지 URL
-    url = "https://fullratio.com/pe-ratio-by-industry"
-    headers = {"User-Agent": "Mozilla/5.0"}
 
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
+debug_download_fullratio: bool = False  
 
-    # 테이블 찾기 (이때 table이 None인지 체크)
-    table = soup.find("table")
-    if table is None:
-        raise Exception(
-            "테이블을 찾을 수 없습니다. 구조가 바뀌었거나 JS로 로딩될 수 있습니다."
-        )
+def _parse_threecol_text(text: str, value_colname: str) -> pl.DataFrame:
+    """
+    'Industry Value Count' 형식의 텍스트를 파싱.
+    value_colname: "ROE", "ROA", "P/E Ratio" 등
+    """
+    lines = [ln.strip() for ln in text.strip().splitlines() if ln.strip()]
 
-    # tbody가 있는 경우
-    tbody = table.find("tbody")
-    if tbody:
-        rows = tbody.find_all("tr")
-    else:
-        rows = table.find_all("tr")[1:]  # 헤더 제외
+    # --- 1) 헤더 처리 (average 등 불필요한 단어 제거 후 판별)
+    if lines:
+        hdr = lines[0].lower()
+        hdr = hdr.replace("average", "").strip() # 🔑 average 제거
+        if "industry" in hdr and (value_colname.lower() in hdr or "ratio" in hdr):
+            lines = lines[1:]
 
-    # 각 행에서 데이터 추출
-    per_data = []
-    for row in rows:
-        cols = row.find_all("td")
-        if len(cols) >= 2:
-            industry = cols[0].text.strip()
-            pe_ratio = cols[1].text.strip()
-            per_data.append({"Industry": industry, "P/E Ratio": pe_ratio})
+    rows = []
+    pat = re.compile(r"^(?P<industry>.+?)\s+(?P<val>[-+]?\d+(?:\.\d+)?)\s+(?P<count>\d+)\s*$")
 
-    # 결과 출력
-    return pl.DataFrame(per_data)
+    for ln in lines:
+        parts = re.split(r"\t+", ln)
+        if len(parts) >= 3:
+            industry = parts[0].strip()
+            val = float(parts[1].replace(",", ""))
+            count = int(parts[2].replace(",", ""))
+        else:
+            m = pat.match(ln)
+            if not m:
+                continue
+            industry = m.group("industry").strip()
+            val = float(m.group("val"))
+            count = int(m.group("count"))
+        rows.append({"Industry": industry, value_colname: val, "Count": count})
 
+    if not rows:
+        raise ValueError(f"유효한 데이터 행을 찾지 못했습니다. ({value_colname})")
 
-def download_industry_roe():
-    url_roe = "https://fullratio.com/roe-by-industry"
-    headers_roe = {"User-Agent": "Mozilla/5.0"}
+    return pl.DataFrame(rows)
 
-    response_roe = requests.get(url_roe, headers=headers_roe)
-    soup_roe = BeautifulSoup(response_roe.text, "html.parser")
+def parse_industry_per_from_text(text: str) -> pl.DataFrame:    
+    return _parse_threecol_text(text, "P/E Ratio")
 
-    # 테이블 찾기 (이때 table이 None인지 체크)
-    table_roe = soup_roe.find("table")
-    if table_roe is None:
-        raise Exception(
-            "테이블을 찾을 수 없습니다. 구조가 바뀌었거나 JS로 로딩될 수 있습니다."
-        )
+def parse_industry_roe_from_text(text: str) -> pl.DataFrame:
+    return _parse_threecol_text(text, "ROE")
 
-    # tbody가 있는 경우
-    tbody_roe = table_roe.find("tbody")
-    if tbody_roe:
-        rows_roe = tbody_roe.find_all("tr")
-    else:
-        rows_roe = table_roe.find_all("tr")[1:]  # 헤더 제외
-
-    # 각 행에서 데이터 추출
-    roe_data = []
-    for row in rows_roe:
-        cols_roe = row.find_all("td")
-        if len(cols_roe) >= 2:
-            industry_roe = cols_roe[0].text.strip()
-            roe_num = cols_roe[1].text.strip()
-            roe_data.append({"Industry": industry_roe, "ROE": roe_num})
-
-    # 결과 출력
-    return pl.DataFrame(roe_data)
-
-
-def download_industry_roa():
-    url_roa = "https://fullratio.com/roa-by-industry"
-    headers_roa = {"User-Agent": "Mozilla/5.0"}
-
-    response_roa = requests.get(url_roa, headers=headers_roa)
-    soup_roa = BeautifulSoup(response_roa.text, "html.parser")
-
-    # 테이블 찾기 (이때 table이 None인지 체크)
-    table_roa = soup_roa.find("table")
-    if table_roa is None:
-        raise Exception(
-            "테이블을 찾을 수 없습니다. 구조가 바뀌었거나 JS로 로딩될 수 있습니다."
-        )
-
-    # tbody가 있는 경우
-    tbody_roa = table_roa.find("tbody")
-    if tbody_roa:
-        rows_roa = tbody_roa.find_all("tr")
-    else:
-        rows_roa = table_roa.find_all("tr")[1:]  # 헤더 제외
-
-    # 각 행에서 데이터 추출
-    roa_data = []
-    for row in rows_roa:
-        cols_roa = row.find_all("td")
-        if len(cols_roa) >= 2:
-            industry_roa = cols_roa[0].text.strip()
-            roa_num = cols_roa[1].text.strip()
-            roa_data.append({"Industry": industry_roa, "ROA": roa_num})
-
-    df_roa = pl.DataFrame(roa_data)
-    return pl.DataFrame(roa_data)
-
-
+def parse_industry_roa_from_text(text: str) -> pl.DataFrame:
+    return _parse_threecol_text(text, "ROA")
 #
-df_per = download_industry_per()
-df_roe = download_industry_roe()
-df_roa = download_industry_roa()
+#### SOURCE: https://fullratio.com/pe-ratio-by-industry ####
+#### 2025년 9월 기준 업데이트 완료 ####
+df_per  = parse_industry_per_from_text("""Industry	Average P/E ratio	Number of companies
+Advertising Agencies	31.13	27
+Aerospace & Defense	35.32	57
+Agricultural Inputs	22.15	11
+Airlines	17.9	13
+Aluminum	27.48	4
+Apparel Manufacturing	20.28	15
+Apparel Retail	17.71	29
+Asset Management	13.42	83
+Auto Manufacturers	8.32	17
+Auto Parts	17.72	44
+Auto & Truck Dealerships	17.86	20
+Banks - Diversified	14.64	5
+Banks - Regional	14.06	288
+Beverages - Non-Alcoholic	26.32	12
+Biotechnology	19.45	476
+Broadcasting	12.21	10
+Building Materials	24.47	10
+Building Products & Equipment	23.95	27
+Business Equipment & Supplies	12.79	5
+Capital Markets	21.16	48
+Chemicals	11.47	15
+Communication Equipment	30.59	43
+Computer Hardware	20.81	28
+Conglomerates	27.15	15
+Consulting Services	27.05	14
+Copper	21.3	4
+Credit Services	13.35	40
+Diagnostics & Research	26.33	46
+Discount Stores	29.54	8
+Drug Manufacturers - General	20.05	14
+Drug Manufacturers - Specialty & Generic	21.72	48
+Education & Training Services	21.63	19
+Electrical Equipment & Parts	25.48	39
+Electronic Components	40.9	35
+Electronic Gaming & Multimedia	16.36	12
+Electronics & Computer Distribution	19.27	9
+Engineering & Construction	35.22	36
+Entertainment	38.74	35
+Farm & Heavy Construction Machinery	19.74	19
+Farm Products	23.85	15
+Financial Data & Stock Exchanges	26.43	11
+Food Distribution	32.77	11
+Footwear & Accessories	21.24	9
+Furnishings, Fixtures & Appliances	18.82	25
+Gambling	17.69	9
+Gold	31.94	31
+Grocery Stores	17.38	9
+Healthcare Plans	14.28	11
+Health Information Services	43.24	40
+Home Improvement Retail	26.52	8
+Household & Personal Products	22.03	24
+Industrial Distribution	31.71	17
+Information Technology Services	24.53	49
+Insurance Brokers	22.57	13
+Insurance - Diversified	11.96	9
+Insurance - Life	15.09	15
+Insurance - Property & Casualty	14.1	36
+Insurance - Reinsurance	12.99	8
+Insurance - Specialty	11.52	20
+Integrated Freight & Logistics	19.04	17
+Internet Content & Information	22.34	45
+Internet Retail	22.8	26
+Leisure	24.03	23
+Lodging	27.76	8
+Marine Shipping	14.75	24
+Medical Care Facilities	19.7	38
+Medical Devices	30.13	110
+Medical Distribution	25.52	6
+Medical Instruments & Supplies	32.54	42
+Metal Fabrication	22.2	15
+Mortgage Finance	15.81	15
+Oil & Gas E&P	12.74	60
+Oil & Gas Equipment & Services	15.92	42
+Oil & Gas Integrated	19.45	6
+Oil & Gas Midstream	14.93	36
+Oil & Gas Refining & Marketing	20.44	17
+Packaged Foods	20.11	46
+Packaging & Containers	19.38	20
+Personal Services	24.38	10
+Pollution & Treatment Controls	32.96	12
+Railroads	17.85	8
+Real Estate - Development	20.08	8
+Real Estate Services	39.49	30
+Recreational Vehicles	28.26	11
+REIT - Diversified	27.55	16
+REIT - Healthcare Facilities	31.77	16
+REIT - Hotel & Motel	27.27	14
+REIT - Industrial	27.25	17
+REIT - Mortgage	16.53	40
+REIT - Office	41.79	22
+REIT - Residential	31.23	20
+REIT - Retail	27.9	26
+REIT - Specialty	38.16	19
+Rental & Leasing Services	20.28	18
+Residential Construction	12.48	22
+Resorts & Casinos	23.48	16
+Restaurants	20.35	43
+Scientific & Technical Instruments	36.82	24
+Security & Protection Services	22.75	15
+Semiconductor Equipment & Materials	29.99	27
+Semiconductors	46.61	60
+Software - Application	40.95	169
+Software - Infrastructure	31.79	119
+Solar	21.22	19
+Specialty Business Services	28.52	31
+Specialty Chemicals	26.9	50
+Specialty Industrial Machinery	28.79	68
+Specialty Retail	22.98	36
+Staffing & Employment Services	26.53	21
+Steel	18.52	11
+Telecom Services	18.76	33
+Thermal Coal	17.34	6
+Tobacco	19.69	8
+Tools & Accessories	24.89	9
+Travel Services	25.58	12
+Trucking	28.15	13
+Utilities - Diversified	15.44	10
+Utilities - Regulated Electric	21.06	32
+Utilities - Regulated Gas	20.15	16
+Utilities - Regulated Water	21.83	13""")
+
+
+#### SOURCE: https://fullratio.com/roe-by-industry ####
+#### 2025년 9월 기준 업데이트 완료 ####
+
+df_roe = parse_industry_roe_from_text("""Industry	Average ROE	Number of companies
+Advertising Agencies	-0.8	27
+Aerospace & Defense	8.4	57
+Agricultural Inputs	1.9	11
+Airlines	5.3	13
+Aluminum	11.8	4
+Apparel Manufacturing	4	15
+Apparel Retail	12.9	29
+Asset Management	9.3	83
+Auto Parts	2.5	44
+Auto & Truck Dealerships	10.3	20
+Banks - Diversified	11.5	5
+Banks - Regional	8.3	288
+Beverages - Non-Alcoholic	21.3	12
+Beverages - Wineries & Distilleries	6.6	6
+Biotechnology	-66.3	476
+Broadcasting	9.6	10
+Building Materials	18.7	10
+Building Products & Equipment	12.9	27
+Business Equipment & Supplies	9.9	5
+Capital Markets	13.2	48
+Chemicals	-5.4	15
+Coking Coal	1.2	5
+Communication Equipment	-1.3	43
+Computer Hardware	-15.3	28
+Conglomerates	5.9	15
+Consulting Services	11	14
+Consumer Electronics	-8.9	8
+Copper	10.1	4
+Credit Services	10.1	40
+Diagnostics & Research	-21.6	46
+Discount Stores	21.8	8
+Drug Manufacturers - General	48.7	14
+Drug Manufacturers - Specialty & Generic	-14.5	48
+Education & Training Services	14.6	19
+Electrical Equipment & Parts	5.9	39
+Electronic Components	-1.1	35
+Electronic Gaming & Multimedia	8.3	12
+Electronics & Computer Distribution	1	9
+Engineering & Construction	15.6	36
+Entertainment	0.9	35
+Farm & Heavy Construction Machinery	7.6	19
+Farm Products	10.6	15
+Financial Data & Stock Exchanges	16.6	11
+Food Distribution	2.9	11
+Footwear & Accessories	15.3	9
+Furnishings, Fixtures & Appliances	5.7	25
+Gambling	15.8	9
+Gold	7.3	31
+Grocery Stores	17.2	9
+Healthcare Plans	2.4	11
+Health Information Services	-9.5	40
+Home Improvement Retail	7.7	8
+Household & Personal Products	6.9	24
+Industrial Distribution	14.6	17
+Information Technology Services	8.6	49
+Insurance Brokers	6.6	13
+Insurance - Diversified	13.1	9
+Insurance - Life	8.1	15
+Insurance - Property & Casualty	13	36
+Insurance - Reinsurance	9.2	8
+Insurance - Specialty	10.9	20
+Integrated Freight & Logistics	10.2	17
+Internet Content & Information	0.9	45
+Internet Retail	13.2	26
+Leisure	1.2	23
+Luxury Goods	-0.8	8
+Marine Shipping	7.5	24
+Medical Care Facilities	-13.3	38
+Medical Devices	-46.7	110
+Medical Instruments & Supplies	-24	42
+Metal Fabrication	7.7	15
+Mortgage Finance	5.6	15
+Oil & Gas Drilling	-0.2	8
+Oil & Gas E&P	9.8	60
+Oil & Gas Equipment & Services	9.6	42
+Oil & Gas Integrated	8.4	6
+Oil & Gas Midstream	14.5	36
+Oil & Gas Refining & Marketing	1.1	17
+Other Industrial Metals & Mining	-9.9	17
+Other Precious Metals & Mining	-2.4	10
+Packaged Foods	7.3	46
+Packaging & Containers	11.6	20
+Paper & Paper Products	3.9	4
+Personal Services	15.4	10
+Pollution & Treatment Controls	13.2	12
+Publishing	2.5	7
+Railroads	21	8
+Real Estate - Development	3.3	8
+Real Estate Services	1.6	30
+Recreational Vehicles	0.1	11
+REIT - Diversified	1.3	16
+REIT - Healthcare Facilities	2.6	16
+REIT - Hotel & Motel	2.4	14
+REIT - Industrial	5.8	17
+REIT - Mortgage	1.6	40
+REIT - Office	-1.4	22
+REIT - Residential	4.1	20
+REIT - Retail	6.7	26
+REIT - Specialty	6.9	19
+Rental & Leasing Services	13.2	18
+Residential Construction	17.6	22
+Resorts & Casinos	15	16
+Restaurants	9.5	43
+Scientific & Technical Instruments	10	24
+Security & Protection Services	12.8	15
+Semiconductor Equipment & Materials	4.6	27
+Semiconductors	0.9	60
+Software - Application	-1.4	169
+Software - Infrastructure	1.9	119
+Solar	-6	19
+Specialty Business Services	8.1	31
+Specialty Chemicals	5.5	50
+Specialty Industrial Machinery	9.8	68
+Specialty Retail	9.4	36
+Staffing & Employment Services	12.3	21
+Steel	1.6	11
+Telecom Services	4.7	33
+Thermal Coal	10.2	6
+Tools & Accessories	11.6	9
+Travel Services	29.4	12
+Trucking	4.7	13
+Utilities - Diversified	7.3	10
+Utilities - Regulated Electric	10	32
+Utilities - Regulated Gas	9.3	16
+Utilities - Regulated Water	9.2	13
+Utilities - Renewable	7.8	15
+Waste Management	10.5	13""")
+                                      
+
+#### SOURCE: https://fullratio.com/roa-by-industry ####
+#### 2025년 9월 기준 업데이트 완료 ####
+
+df_roa = parse_industry_roa_from_text("""Industry	Average ROA	Number of companies
+Advertising Agencies	-0.5	27
+Aerospace & Defense	3.9	57
+Agricultural Inputs	0	11
+Airlines	0.8	13
+Aluminum	4	4
+Apparel Manufacturing	3	15
+Apparel Retail	3.3	29
+Asset Management	2.6	83
+Auto Manufacturers	2.5	17
+Auto Parts	2.9	44
+Auto & Truck Dealerships	1.4	20
+Banks - Diversified	1.1	5
+Banks - Regional	0.9	288
+Beverages - Non-Alcoholic	9.2	12
+Beverages - Wineries & Distilleries	3.3	6
+Biotechnology	-46.6	476
+Broadcasting	-0.6	10
+Building Materials	10.7	10
+Building Products & Equipment	6.3	27
+Business Equipment & Supplies	5	5
+Capital Markets	1.8	48
+Chemicals	-4.8	15
+Coking Coal	-3.9	5
+Communication Equipment	-0.6	43
+Computer Hardware	-4.6	28
+Conglomerates	1.7	15
+Consulting Services	3.5	14
+Consumer Electronics	-2.1	8
+Copper	2.7	4
+Credit Services	2.1	40
+Diagnostics & Research	-14.5	46
+Discount Stores	4.6	8
+Drug Manufacturers - General	-3.4	14
+Drug Manufacturers - Specialty & Generic	-9	48
+Education & Training Services	6	19
+Electrical Equipment & Parts	2	39
+Electronic Components	-0.6	35
+Electronic Gaming & Multimedia	-2.4	12
+Electronics & Computer Distribution	3.3	9
+Engineering & Construction	5.3	36
+Entertainment	-0.4	35
+Farm & Heavy Construction Machinery	2.9	19
+Farm Products	2	15
+Financial Data & Stock Exchanges	3.2	11
+Food Distribution	1.7	11
+Footwear & Accessories	5	9
+Furnishings, Fixtures & Appliances	2.1	25
+Gambling	4.1	9
+Gold	4.4	31
+Grocery Stores	2.9	9
+Healthcare Plans	-0.5	11
+Health Information Services	-9.2	40
+Home Improvement Retail	3.8	8
+Household & Personal Products	5.3	24
+Industrial Distribution	6.9	17
+Information Technology Services	3.3	49
+Insurance Brokers	1.8	13
+Insurance - Diversified	2.7	9
+Insurance - Life	1.1	15
+Insurance - Property & Casualty	3	36
+Insurance - Reinsurance	2	8
+Insurance - Specialty	1.5	20
+Integrated Freight & Logistics	2.8	17
+Internet Content & Information	-0.3	45
+Internet Retail	4	26
+Leisure	0	23
+Lodging	4.7	8
+Luxury Goods	-2.4	8
+Marine Shipping	5	24
+Medical Care Facilities	-1.8	38
+Medical Devices	-25.5	110
+Medical Distribution	-6.3	6
+Medical Instruments & Supplies	-14.1	42
+Metal Fabrication	3.9	15
+Mortgage Finance	0.6	15
+Oil & Gas Drilling	-0.5	8
+Oil & Gas E&P	3.6	60
+Oil & Gas Equipment & Services	3.4	42
+Oil & Gas Integrated	4	6
+Oil & Gas Midstream	4.7	36
+Oil & Gas Refining & Marketing	0	17
+Other Industrial Metals & Mining	-6.3	17
+Other Precious Metals & Mining	-1.4	10
+Packaged Foods	3.9	46
+Packaging & Containers	3.3	20
+Paper & Paper Products	2.7	4
+Personal Services	8.8	10
+Pollution & Treatment Controls	7.1	12
+Publishing	-0.4	7
+Railroads	5.5	8
+Real Estate - Development	1.2	8
+Real Estate Services	0.5	30
+Recreational Vehicles	0.7	11
+REIT - Diversified	1	16
+REIT - Healthcare Facilities	1.4	16
+REIT - Hotel & Motel	0.9	14
+REIT - Industrial	3.4	17
+REIT - Mortgage	0.4	40
+REIT - Office	-0.4	22
+REIT - Residential	1.7	20
+REIT - Retail	2.5	26
+REIT - Specialty	2.7	19
+Rental & Leasing Services	2.3	18
+Residential Construction	9.2	22
+Resorts & Casinos	1.7	16
+Restaurants	2.7	43
+Scientific & Technical Instruments	3.3	24
+Security & Protection Services	5.7	15
+Semiconductor Equipment & Materials	3	27
+Semiconductors	-1.1	60
+Software - Application	-1.5	169
+Software - Infrastructure	-0.6	119
+Solar	-3.6	19
+Specialty Business Services	3.5	31
+Specialty Chemicals	1.6	50
+Specialty Industrial Machinery	6.3	68
+Specialty Retail	4.2	36
+Staffing & Employment Services	3.5	21
+Steel	1.7	11
+Telecom Services	-0.1	33
+Thermal Coal	6.9	6
+Tobacco	12.5	8
+Tools & Accessories	5.4	9
+Travel Services	5.1	12
+Trucking	2.8	13
+Utilities - Diversified	2.1	10
+Utilities - Regulated Electric	2.8	32
+Utilities - Regulated Gas	2.6	16
+Utilities - Regulated Water	2.9	13
+Utilities - Renewable	1	15
+Waste Management	-0.5	13""")
+
+if debug_download_fullratio:
+    print(df_per) 
+
+    print(df_roe) 
+
+    print(df_roa) 
 
 
 def get_industry_per(ind):
