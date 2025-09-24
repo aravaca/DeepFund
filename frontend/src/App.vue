@@ -176,6 +176,16 @@ const updateRibbon = async () => {
   }
 }
 
+const updateTopTickers = async () => {
+  try {
+    const res = await fetch('/api/top-tickers-live')
+    const data = await res.json()
+    tickers.value = data.tickers.reverse()
+  } catch (err) {
+    console.error('실시간 티커 업데이트 실패:', err)
+  }
+}
+
 const submitEmail = async () => {
   try {
     const response = await fetch('https://portfolio-production-54cf.up.railway.app/subscribe', {
@@ -200,7 +210,7 @@ function handleClickOutside(e) {
 onMounted(async () => {
   // ① 종목 데이터 로드
   try {
-    const res = await fetch('https://portfolio-production-54cf.up.railway.app/top-tickers')
+    const res = await fetch('/api/top-tickers-live')
     const data = await res.json()
     tickers.value = data.tickers.reverse()
   } catch (e) {
@@ -255,6 +265,9 @@ onMounted(async () => {
   // 마켓 리본 초기화 및 주기적 갱신
   await updateRibbon()
   setInterval(updateRibbon, 30000)
+
+  await updateTopTickers()
+  setInterval(updateTopTickers, 60000)
 
   document.addEventListener('click', handleClickOutside)
 });
