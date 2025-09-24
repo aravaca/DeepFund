@@ -68,6 +68,8 @@ def subscribe():
     if not email:
         return jsonify({"message": "⚠️ 유효한 이메일이 아닙니다."}), 400
 
+    # 폴더가 없으면 생성
+    os.makedirs(os.path.dirname(RECIPIENT_FILE), exist_ok=True)
     if not os.path.exists(RECIPIENT_FILE):
         with open(RECIPIENT_FILE, "w") as f:
             json.dump([], f)
