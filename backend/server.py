@@ -132,29 +132,30 @@ def market_data():
     return Response(json_str, mimetype="application/json")
 
 
-@app.route("/top-tickers")
-def top_tickers():
-    df = pd.read_excel(excel_path, sheet_name="종목분석")
+# @app.route("/top-tickers")
+# def top_tickers():
+#     df = pd.read_excel(excel_path, sheet_name="종목분석")
 
-    df_top = df.head(15)
-    unique_tickers = []
-    tickers = []
+#     df_top = df.head(15)
+#     unique_tickers = []
+#     tickers = []
 
-    for _, row in df_top.iterrows():
-        ticker = row["종목"]
-        if ticker not in unique_tickers:
-            unique_tickers.append(ticker)
-            tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
-        if len(tickers) == 10:
-            break
+#     for _, row in df_top.iterrows():
+#         ticker = row["종목"]
+#         if ticker not in unique_tickers:
+#             unique_tickers.append(ticker)
+#             tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
+#         if len(tickers) == 10:
+#             break
 
-    return jsonify({"tickers": tickers})
+#     return jsonify({"tickers": tickers})
 
 
 @app.route("/api/top-tickers-live")
 def top_tickers_live():
     # 엑셀에서 종목명만 추출
     df = pd.read_excel(excel_path, sheet_name="종목분석")
+
     df_top = df.head(15)
     unique_tickers = []
     tickers = []
