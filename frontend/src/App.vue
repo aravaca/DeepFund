@@ -312,6 +312,15 @@ function hideMagnifier() {
   magnifierStyle.value.display = 'none'
 }
 
+const updateTopTickers = async () => {
+  try {
+    const res = await fetch('/api/top-tickers-live')
+    const data = await res.json()
+    tickers.value = data.tickers.reverse()
+  } catch (err) {
+    console.error('실시간 티커 업데이트 실패:', err)
+  }
+}
 
 
 </script>
@@ -717,16 +726,7 @@ a.ticker {
     width: 120px;
   }
 
-  .list-header .change {
-    width: 90px;
-  }
-
-  .report-box {
-    padding: 36px 20px;
-  }
-
-  .subscribe-form {
-    flex-direction: column;
+  .list-header .change
     gap: 8px;
   }
 

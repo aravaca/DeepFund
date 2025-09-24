@@ -1,3 +1,33 @@
+@app.route("/api/top-tickers-live")
+def top_tickers_live():
+    df = pd.read_excel(excel_path, sheet_name="종목분석")
+    df_top = df.head(15)
+    unique_tickers = []
+    tickers = []
+
+    for _, row in df_top.iterrows():
+        ticker = str(row["종목"])
+        if ticker not in unique_tickers:
+            unique_tickers.append(ticker)
+            try:
+                yf_ticker = yf.Ticker(ticker)
+                hist = yf_ticker.history(period="1mo")
+                if len(hist) >= 2:
+                    price_now = hist["Close"].iloc[-1]
+                    price_month_ago = hist["Close"].iloc[0]
+                    change = price_now - price_month_ago
+                    percent_change = (change / price_month_ago) * 100
+                    sign = "+" if percent_change > 0 else "-" if percent_change < 0 else ""
+                    change_str = f"{sign}{abs(percent_change):.2f}%"
+                else:
+                    change_str = "N/A"
+            except Exception as e:
+                change_str = "N/A"
+            tickers.append({"ticker": ticker, "change": change_str})
+        if len(tickers) == 10:
+            break
+
+    return jsonify({"tickers": tickers})
 import os
 import json
 from flask import Flask, request, jsonify
