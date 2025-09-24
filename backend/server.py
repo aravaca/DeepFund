@@ -15,7 +15,7 @@ excel_path = os.path.join(os.path.dirname(__file__), "deep_fund.xlsx")
 app = Flask(__name__, static_folder="dist", static_url_path="")
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-RECIPIENT_FILE = "backend/recipients.json"
+RECIPIENT_FILE = "recipients.json"
 
 
 @app.route("/")
