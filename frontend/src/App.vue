@@ -176,6 +176,16 @@ const updateRibbon = async () => {
   }
 }
 
+const updateTopTickers = async () => {
+  try {
+    const res = await fetch('/api/top-tickers-live')
+    const data = await res.json()
+    tickers.value = data.tickers.reverse()
+  } catch (err) {
+    console.error('실시간 티커 업데이트 실패:', err)
+  }
+}
+
 const submitEmail = async () => {
   try {
     const response = await fetch('https://portfolio-production-54cf.up.railway.app/subscribe', {
@@ -256,6 +266,9 @@ onMounted(async () => {
   await updateRibbon()
   setInterval(updateRibbon, 30000)
 
+  await updateTopTickers()
+  setInterval(updateTopTickers, 30000) // 30초마다 갱신
+
   document.addEventListener('click', handleClickOutside)
 });
 onBeforeUnmount(() => {
@@ -312,15 +325,6 @@ function hideMagnifier() {
   magnifierStyle.value.display = 'none'
 }
 
-const updateTopTickers = async () => {
-  try {
-    const res = await fetch('/api/top-tickers-live')
-    const data = await res.json()
-    tickers.value = data.tickers.reverse()
-  } catch (err) {
-    console.error('실시간 티커 업데이트 실패:', err)
-  }
-}
 
 
 </script>
@@ -726,7 +730,16 @@ a.ticker {
     width: 120px;
   }
 
-  .list-header .change
+  .list-header .change {
+    width: 90px;
+  }
+
+  .report-box {
+    padding: 36px 20px;
+  }
+
+  .subscribe-form {
+    flex-direction: column;
     gap: 8px;
   }
 
