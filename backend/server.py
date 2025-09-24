@@ -1,4 +1,3 @@
-
 import os
 import json
 from flask import Flask, request, jsonify
@@ -152,6 +151,7 @@ def top_tickers():
 
 @app.route("/api/top-tickers-live")
 def top_tickers_live():
+    # 엑셀에서 종목명만 추출
     df = pd.read_excel(excel_path, sheet_name="종목분석")
     df_top = df.head(15)
     unique_tickers = []
