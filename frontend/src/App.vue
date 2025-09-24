@@ -210,7 +210,7 @@ function handleClickOutside(e) {
 onMounted(async () => {
   // ① 종목 데이터 로드
   try {
-    const res = await fetch('https://portfolio-production-54cf.up.railway.app/top-tickers')
+    const res = await fetch('/api/top-tickers-live')
     const data = await res.json()
     tickers.value = data.tickers.reverse()
   } catch (e) {
@@ -267,7 +267,7 @@ onMounted(async () => {
   setInterval(updateRibbon, 30000)
 
   await updateTopTickers()
-  setInterval(updateTopTickers, 30000) // 30초마다 갱신
+  setInterval(updateTopTickers, 30000)
 
   document.addEventListener('click', handleClickOutside)
 });
