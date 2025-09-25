@@ -151,37 +151,58 @@ def top_tickers():
 #     return jsonify({"tickers": tickers})
 
 
+
+# # --- 기존 엑셀값(1개월대비) API ---
+
+# @app.route("/top-tickers")
+# def top_tickers():
+#     df = pd.read_excel(excel_path, sheet_name="종목분석")
+#     df_top = df.head(15)
+#     unique_tickers = []
+#     tickers = []
+#     for _, row in df_top.iterrows():
+#         ticker = row["종목"]
+#         if ticker not in unique_tickers:
+#             unique_tickers.append(ticker)
+#             tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
+#         if len(tickers) == 10:
+#             break
+#     return jsonify({"tickers": tickers})
+
+# # --- 실시간 MTD 변동률 API ---
 # @app.route("/api/top-tickers-live")
 # def top_tickers_live():
-    # 엑셀에서 종목명만 추출
+    import datetime
     df = pd.read_excel(excel_path, sheet_name="종목분석")
-    
     df_top = df.head(15)
     unique_tickers = []
     tickers = []
-
+    today = datetime.date.today()
+    first_day = today.replace(day=1)
+    yesterday = today - datetime.timedelta(days=1)
     for _, row in df_top.iterrows():
         ticker = str(row["종목"])
+        fallback = str(row["1개월대비"])
         if ticker not in unique_tickers:
             unique_tickers.append(ticker)
             try:
                 yf_ticker = yf.Ticker(ticker)
-                hist = yf_ticker.history(period="1mo")
+                # 월초~어제까지의 가격
+                hist = yf_ticker.history(start=first_day, end=yesterday + datetime.timedelta(days=1))
                 if len(hist) >= 2:
-                    price_now = hist["Close"].iloc[-1]
-                    price_month_ago = hist["Close"].iloc[0]
-                    change = price_now - price_month_ago
-                    percent_change = (change / price_month_ago) * 100
+                    price_start = hist["Close"].iloc[0]
+                    price_end = hist["Close"].iloc[-1]
+                    change = price_end - price_start
+                    percent_change = (change / price_start) * 100
                     sign = "+" if percent_change > 0 else "-" if percent_change < 0 else ""
                     change_str = f"{sign}{abs(percent_change):.2f}%"
                 else:
-                    change_str = "N/A"
+                    change_str = fallback
             except Exception as e:
-                change_str = "N/A"
+                change_str = fallback
             tickers.append({"ticker": ticker, "change": change_str})
         if len(tickers) == 10:
             break
-
     return jsonify({"tickers": tickers})
 
 if __name__ == "__main__":
