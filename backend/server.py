@@ -134,44 +134,6 @@ def market_data():
 
 @app.route("/top-tickers")
 def top_tickers():
-#     df = pd.read_excel(excel_path, sheet_name="종목분석")
-
-#     df_top = df.head(15)
-#     unique_tickers = []
-#     tickers = []
-
-#     for _, row in df_top.iterrows():
-#         ticker = row["종목"]
-#         if ticker not in unique_tickers:
-#             unique_tickers.append(ticker)
-#             tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
-#         if len(tickers) == 10:
-#             break
-
-#     return jsonify({"tickers": tickers})
-
-
-
-# # --- 기존 엑셀값(1개월대비) API ---
-
-# @app.route("/top-tickers")
-# def top_tickers():
-#     df = pd.read_excel(excel_path, sheet_name="종목분석")
-#     df_top = df.head(15)
-#     unique_tickers = []
-#     tickers = []
-#     for _, row in df_top.iterrows():
-#         ticker = row["종목"]
-#         if ticker not in unique_tickers:
-#             unique_tickers.append(ticker)
-#             tickers.append({"ticker": str(ticker), "change": str(row["1개월대비"])})
-#         if len(tickers) == 10:
-#             break
-#     return jsonify({"tickers": tickers})
-
-# # --- 실시간 MTD 변동률 API ---
-# @app.route("/api/top-tickers-live")
-# def top_tickers_live():
     import datetime
     df = pd.read_excel(excel_path, sheet_name="종목분석")
     df_top = df.head(15)
@@ -181,12 +143,13 @@ def top_tickers():
     first_day = today.replace(day=1)
     yesterday = today - datetime.timedelta(days=1)
     for _, row in df_top.iterrows():
-        ticker = str(row["종목"])
+        ticker_code = str(row["티커"])  # '티커' 컬럼 사용
+        ticker = str(row["종목"])  # '티커' 컬럼 사용
         fallback = str(row["1개월대비"])
         if ticker not in unique_tickers:
             unique_tickers.append(ticker)
             try:
-                yf_ticker = yf.Ticker(ticker)
+                yf_ticker = yf.Ticker(ticker_code)
                 # 월초~어제까지의 가격
                 hist = yf_ticker.history(start=first_day, end=yesterday + datetime.timedelta(days=1))
                 if len(hist) >= 2:
