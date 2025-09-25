@@ -141,7 +141,7 @@ def top_tickers():
     tickers = []
     today = datetime.date.today()
     first_day = today.replace(day=1)
-    yesterday = today - datetime.timedelta(days=1)
+    yesterday = today
     for _, row in df_top.iterrows():
         ticker_code = str(row["티커"])  # '티커' 컬럼 사용
         ticker = str(row["종목"])  # '티커' 컬럼 사용
