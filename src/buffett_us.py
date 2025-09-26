@@ -47,7 +47,7 @@ excel_path = os.path.join(project_root, "backend", "deep_fund.xlsx")
 # pip install -r requirements.txt
 
 #########################################################
-recipients = ["chs_3411@naver.com", "eljm2080@gmail.com", "hyungsukchoi3411@gmail.com", "dgim4918@gmail.com", "chschj@terpmail.umd.edu"],
+recipients = ["chs_3411@naver.com", "eljm2080@gmail.com", "hyungsukchoi3411@gmail.com", "dgim4918@gmail.com", "chschj@terpmail.umd.edu"]
 
 # JSON에서 이메일 불러오기
 
