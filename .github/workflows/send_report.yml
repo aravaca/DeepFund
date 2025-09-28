@@ -2,7 +2,7 @@ name: Send Buffett Excel at 8AM KST
 
 on:
   schedule:
-    - cron: '30 21 * * 7'  # 매주 일 21:30 UTC = KST 06:30 + 작업시간 1:30 = 8:00AM KST
+    - cron: '30 21 * * 0'  # 매주 일 21:30 UTC = KST 06:30 + 작업시간 1:30 = 8:00AM KST
   workflow_dispatch:
 
 jobs:
