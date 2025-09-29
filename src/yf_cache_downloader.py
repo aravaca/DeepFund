@@ -6,13 +6,13 @@ import requests
 import io
 from yahooquery import Ticker
 CACHE_FILE = "backend/yf_cache_multi.csv"
-limit = 250
 # api_key = os.environ["FMP_API_KEY"]
 api_key = ""
 
 
-NYSE = 175
-NASDAQ = 75
+limit = 230
+NYSE = 165
+NASDAQ = 65
 
 NASDAQ_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
 OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt"

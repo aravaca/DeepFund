@@ -75,9 +75,9 @@ country = "US"
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
 
-limit = 250  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
-NYSE= 175
-NASDAQ = 75
+limit = 230  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
+NYSE= 165
+NASDAQ = 65
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
 
