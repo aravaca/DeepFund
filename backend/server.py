@@ -140,8 +140,14 @@ def top_tickers():
     unique_tickers = []
     tickers = []
     today = datetime.date.today()
-    first_day = today.replace(day=1)
-    yesterday = today
+    if today.day == 1:
+        # 오늘이 1일이면 지난달 1일로 설정
+        if today.month == 1:
+            first_day = today.replace(year=today.year-1, month=12, day=1)
+        else:
+            first_day = today.replace(month=today.month-1, day=1)
+    else:
+        first_day = today.replace(day=1)
     for _, row in df_top.iterrows():
         ticker_code = str(row["티커"])  # '티커' 컬럼 사용
         ticker = str(row["종목"])  # '티커' 컬럼 사용
@@ -151,7 +157,7 @@ def top_tickers():
             try:
                 yf_ticker = yf.Ticker(ticker_code)
                 # 월초~어제까지의 가격
-                hist = yf_ticker.history(start=first_day, end=yesterday + datetime.timedelta(days=1))
+                hist = yf_ticker.history(start=first_day, end=today + datetime.timedelta(days=1))
                 if len(hist) >= 2:
                     price_start = hist["Close"].iloc[0]
                     price_end = hist["Close"].iloc[-1]

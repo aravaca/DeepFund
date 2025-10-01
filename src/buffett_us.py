@@ -74,24 +74,24 @@ NUM_THREADS = 2  # multithreading
 country = "US"
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
-
-limit = 230  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
-NYSE= 165
-NASDAQ = 65
+# safe range 230 (165+65)
+limit = 10  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
+NYSE= 5
+NASDAQ = 5
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
 
 
 sp500 = True
 
-# top X tickers to optimize
-opt = 20
+# top X tickers to optimize = 20
+opt = 5
 
-# for news
-news_lookup = 100
+# for news = 100
+news_lookup = 5
 
-# for moat
-moat_limit = 200
+# for moat = 200
+moat_limit = 5
 #########################################################
 
 
