@@ -10,9 +10,9 @@ CACHE_FILE = "backend/yf_cache_multi.csv"
 api_key = ""
 
 
-limit = 10
-NYSE = 5
-NASDAQ = 5
+limit = 230 
+NYSE = 165
+NASDAQ = 65
 
 NASDAQ_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
 OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt"

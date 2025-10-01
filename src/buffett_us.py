@@ -75,9 +75,9 @@ country = "US"
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
 # safe range 230 (165+65)
-limit = 10  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
-NYSE= 5
-NASDAQ = 5
+limit = 230  # GEMINI FLASH 2.5 -->>> max 250 requests/day #
+NYSE= 165
+NASDAQ = 65
 
 ## IMPORTANT!! limit must match NYSE + NASDAQ #######
 
@@ -85,13 +85,13 @@ NASDAQ = 5
 sp500 = True
 
 # top X tickers to optimize = 20
-opt = 5
+opt = 20
 
 # for news = 100
-news_lookup = 5
+news_lookup = 100
 
 # for moat = 200
-moat_limit = 5
+moat_limit = 200
 #########################################################
 
 
