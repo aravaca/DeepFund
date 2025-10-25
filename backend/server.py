@@ -140,12 +140,12 @@ def top_tickers():
     unique_tickers = []
     tickers = []
     today = datetime.date.today()
-    if today.day == 1:
+    if today.day <= 5:
         # 오늘이 1일이면 지난달 1일로 설정
         if today.month == 1:
-            first_day = today.replace(year=today.year-1, month=12, day=1)
+            first_day = today.replace(year=today.year-1, month=12, day=today.day)
         else:
-            first_day = today.replace(month=today.month-1, day=1)
+            first_day = today.replace(month=today.month-1, day=today.day)
     else:
         first_day = today.replace(day=1)
     for _, row in df_top.iterrows():
