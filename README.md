@@ -1,4 +1,4 @@
-# DeepFund: Buffett-Style Quantitative Investment Analysis & Optimization
+# DeepFund: AI-Driven Buffett-Style Quantitative Investment Analysis & Optimization
 
 ### A comprehensive full-stack solution integrating Warren Buffett’s timeless investment principles with cutting-edge quantitative techniques and AI-driven market sentiment analysis — delivering optimized portfolios for mid- to long-term value investing in U.S. equities.
 
